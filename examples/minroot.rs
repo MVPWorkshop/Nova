@@ -270,13 +270,16 @@ fn main() {
     assert!(res.is_ok());
     let compressed_snark = res.unwrap();
 
-    let mut encoder = ZlibEncoder::new(Vec::new(), Compression::default());
-    bincode::serialize_into(&mut encoder, &compressed_snark).unwrap();
-    let compressed_snark_encoded = encoder.finish().unwrap();
-    println!(
-      "CompressedSNARK::len {:?} bytes",
-      compressed_snark_encoded.len()
-    );
+    // TODO -> This should not be a problem
+    if cfg!(feature = "std") {
+      let mut encoder = ZlibEncoder::new(Vec::new(), Compression::default());
+      bincode::serialize_into(&mut encoder, &compressed_snark).unwrap();
+      let compressed_snark_encoded = encoder.finish().unwrap();
+      println!(
+        "CompressedSNARK::len {:?} bytes",
+        compressed_snark_encoded.len()
+      );
+    }
 
     // verify the compressed SNARK
     println!("Verifying a CompressedSNARK...");

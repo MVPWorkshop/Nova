@@ -70,6 +70,7 @@ impl<F: PrimeField, A: Arity<F>> HashType<F, A> {
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum CType<F: PrimeField, A: Arity<F>> {
   Arbitrary(u64),
+  // TODO -> Check if needs to change here, but seems like it is using serde, and not bincode ?
   // See: https://github.com/bincode-org/bincode/issues/424
   // This is a bit of a hack, but since `serde(skip)` tags the last variant arm,
   // the generated code ends up being correct. But, in the future, do not

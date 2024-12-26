@@ -747,6 +747,7 @@ mod tests {
     // check if the prover transcript and verifier transcript are kept in the same state
     assert_eq!(post_c_p, post_c_v);
 
+    // ! Should be fine to leave this
     let proof_bytes = bincode::DefaultOptions::new()
       .with_big_endian()
       .with_fixint_encoding()

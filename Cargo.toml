@@ -12,28 +12,41 @@ keywords = ["zkSNARKs", "cryptography", "proofs"]
 rust-version = "1.79.0"
 
 [dependencies]
-ff = { version = "0.13.0", features = ["derive"] }
-digest = "0.10"
-sha3 = "0.10"
-rayon = "1.10"
+ff = { version = "0.13.0", features = ["derive"], default-features = false }
+digest = { version = "0.10", default-features = false }
+sha3 = { version = "0.10", default-features = false }
 rand_core = { version = "0.6", default-features = false }
-rand_chacha = "0.3"
-subtle = "2.6.1"
-pasta_curves = { version = "0.5", features = ["repr-c", "serde"] }
+rand_chacha = { version = "0.3", default-features = false }
+subtle = { version = "2.6.1", default-features = false }
+pasta_curves = { version = "0.5", features = [
+    "repr-c",
+    "serde",
+], default-features = false }
+generic-array = { version = "1.1", default-features = false }
+num-bigint = { version = "0.4.6", features = [
+    "serde",
+    "rand",
+], default-features = false }
+num-traits = { version = "0.2.19", default-features = false }
+num-integer = { version = "0.1.46", default-features = false }
+serde = { version = "1.0.216", features = ["derive"], default-features = false }
+bitvec = { version = "1.0", default-features = false }
+byteorder = { version = "1.4.3", default-features = false }
+thiserror = { version = "2.0", default-features = false }
+group = { version = "0.13.0", default-features = false }
+itertools = { version = "0.13.0", default-features = false }
+hashbrown = { version = "0.15.2", features = [
+    "alloc",
+], default-features = false }
+
+
+# ! TODO -> Fix this -> rayon, halo2curves, bincode, once_cell !!!
+rayon = "1.10"
 halo2curves = { version = "0.6.0", features = ["bits", "derive_serde"] }
-generic-array = "1.1"
-num-bigint = { version = "0.4.6", features = ["serde", "rand"] }
-num-traits = "0.2.19"
-num-integer = "0.1.46"
-serde = { version = "1.0.216", features = ["derive"] }
 bincode = "1.3"
-bitvec = "1.0"
-byteorder = "1.4.3"
-thiserror = "2.0"
-group = "0.13.0"
+# once_cell = { version = "1.18.0", default-features = false }
 once_cell = "1.18.0"
-itertools = "0.13.0"
-hashbrown = { version = "0.15.2", features = ["alloc"] }
+
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 getrandom = { version = "0.2", default-features = false, features = ["js"] }
@@ -70,6 +83,6 @@ name = "ppsnark"
 harness = false
 
 [features]
-default = ["halo2curves/asm", "std"]
+default = ["std"]
 std = []
 flamegraph = ["pprof2/flamegraph", "pprof2/criterion"]

@@ -165,7 +165,7 @@ fn main() {
     // produce public parameters
     let start = Instant::now();
     println!("Producing public parameters...");
-    let pp = PublicParams::<
+    let mut pp = PublicParams::<
       E1,
       E2,
       MinRootCircuit<<E1 as Engine>::GE>,
@@ -224,7 +224,7 @@ fn main() {
     println!("Generating a RecursiveSNARK...");
     let mut recursive_snark: RecursiveSNARK<E1, E2, C1, C2> =
       RecursiveSNARK::<E1, E2, C1, C2>::new(
-        &pp,
+        &mut pp,
         &minroot_circuits[0],
         &circuit_secondary,
         &z0_primary,
@@ -234,7 +234,7 @@ fn main() {
 
     for (i, circuit_primary) in minroot_circuits.iter().enumerate() {
       let start = Instant::now();
-      let res = recursive_snark.prove_step(&pp, circuit_primary, &circuit_secondary);
+      let res = recursive_snark.prove_step(&mut pp, circuit_primary, &circuit_secondary);
       assert!(res.is_ok());
       println!(
         "RecursiveSNARK::prove_step {}: {:?}, took {:?} ",
@@ -247,7 +247,7 @@ fn main() {
     // verify the recursive SNARK
     println!("Verifying a RecursiveSNARK...");
     let start = Instant::now();
-    let res = recursive_snark.verify(&pp, num_steps, &z0_primary, &z0_secondary);
+    let res = recursive_snark.verify(&mut pp, num_steps, &z0_primary, &z0_secondary);
     println!(
       "RecursiveSNARK::verify: {:?}, took {:?}",
       res.is_ok(),
@@ -257,11 +257,11 @@ fn main() {
 
     // produce a compressed SNARK
     println!("Generating a CompressedSNARK using Spartan with HyperKZG...");
-    let (pk, vk) = CompressedSNARK::<_, _, _, _, S1, S2>::setup(&pp).unwrap();
+    let (pk, mut vk) = CompressedSNARK::<_, _, _, _, S1, S2>::setup(&mut pp).unwrap();
 
     let start = Instant::now();
 
-    let res = CompressedSNARK::<_, _, _, _, S1, S2>::prove(&pp, &pk, &recursive_snark);
+    let res = CompressedSNARK::<_, _, _, _, S1, S2>::prove(&mut pp, &pk, &recursive_snark);
     println!(
       "CompressedSNARK::prove: {:?}, took {:?}",
       res.is_ok(),
@@ -284,7 +284,7 @@ fn main() {
     // verify the compressed SNARK
     println!("Verifying a CompressedSNARK...");
     let start = Instant::now();
-    let res = compressed_snark.verify(&vk, num_steps, &z0_primary, &z0_secondary);
+    let res = compressed_snark.verify(&mut vk, num_steps, &z0_primary, &z0_secondary);
     println!(
       "CompressedSNARK::verify: {:?}, took {:?}",
       res.is_ok(),

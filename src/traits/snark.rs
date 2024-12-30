@@ -52,11 +52,12 @@ pub trait RelaxedR1CSSNARKTrait<E: Engine>:
   ) -> Result<Self, NovaError>;
 
   /// Verifies a SNARK for a relaxed R1CS
-  fn verify(&self, vk: &Self::VerifierKey, U: &RelaxedR1CSInstance<E>) -> Result<(), NovaError>;
+  fn verify(&self, vk: &mut Self::VerifierKey, U: &RelaxedR1CSInstance<E>)
+    -> Result<(), NovaError>;
 }
 
 /// A helper trait that defines the behavior of a verifier key of `zkSNARK`
 pub trait DigestHelperTrait<E: Engine> {
   /// Returns the digest of the verifier's key
-  fn digest(&self) -> E::Scalar;
+  fn digest(&mut self) -> E::Scalar;
 }

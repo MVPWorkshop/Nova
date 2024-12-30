@@ -67,7 +67,7 @@ fn bench_compressed_snark_internal<S1: RelaxedR1CSSNARKTrait<E1>, S2: RelaxedR1C
   let c_secondary = TrivialCircuit::default();
 
   // Produce public parameters
-  let pp = PublicParams::<E1, E2, C1, C2>::setup(
+  let mut pp = PublicParams::<E1, E2, C1, C2>::setup(
     &c_primary,
     &c_secondary,
     &*S1::ck_floor(),
@@ -76,12 +76,12 @@ fn bench_compressed_snark_internal<S1: RelaxedR1CSSNARKTrait<E1>, S2: RelaxedR1C
   .unwrap();
 
   // Produce prover and verifier keys for CompressedSNARK
-  let (pk, vk) = CompressedSNARK::<_, _, _, _, S1, S2>::setup(&pp).unwrap();
+  let (pk, mut vk) = CompressedSNARK::<_, _, _, _, S1, S2>::setup(&mut pp).unwrap();
 
   // produce a recursive SNARK
   let num_steps = 3;
   let mut recursive_snark: RecursiveSNARK<E1, E2, C1, C2> = RecursiveSNARK::new(
-    &pp,
+    &mut pp,
     &c_primary,
     &c_secondary,
     &[<E1 as Engine>::Scalar::from(2u64)],
@@ -90,12 +90,12 @@ fn bench_compressed_snark_internal<S1: RelaxedR1CSSNARKTrait<E1>, S2: RelaxedR1C
   .unwrap();
 
   for i in 0..num_steps {
-    let res = recursive_snark.prove_step(&pp, &c_primary, &c_secondary);
+    let res = recursive_snark.prove_step(&mut pp, &c_primary, &c_secondary);
     assert!(res.is_ok());
 
     // verify the recursive snark at each step of recursion
     let res = recursive_snark.verify(
-      &pp,
+      &mut pp,
       i + 1,
       &[<E1 as Engine>::Scalar::from(2u64)],
       &[<E2 as Engine>::Scalar::from(2u64)],
@@ -107,14 +107,14 @@ fn bench_compressed_snark_internal<S1: RelaxedR1CSSNARKTrait<E1>, S2: RelaxedR1C
   group.bench_function("Prove", |b| {
     b.iter(|| {
       assert!(CompressedSNARK::<_, _, _, _, S1, S2>::prove(
-        black_box(&pp),
+        black_box(&mut pp),
         black_box(&pk),
         black_box(&recursive_snark),
       )
       .is_ok());
     })
   });
-  let res = CompressedSNARK::<_, _, _, _, S1, S2>::prove(&pp, &pk, &recursive_snark);
+  let res = CompressedSNARK::<_, _, _, _, S1, S2>::prove(&mut pp, &pk, &recursive_snark);
   assert!(res.is_ok());
   let compressed_snark = res.unwrap();
 
@@ -123,7 +123,7 @@ fn bench_compressed_snark_internal<S1: RelaxedR1CSSNARKTrait<E1>, S2: RelaxedR1C
     b.iter(|| {
       assert!(black_box(&compressed_snark)
         .verify(
-          black_box(&vk),
+          black_box(&mut vk),
           black_box(num_steps),
           black_box(&[<E1 as Engine>::Scalar::from(2u64)]),
           black_box(&[<E2 as Engine>::Scalar::from(2u64)]),

@@ -24,7 +24,7 @@ use core::{
 use ff::Field;
 use itertools::Itertools;
 use rand_core::OsRng;
-use rayon::prelude::*;
+// use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
 /// Alias to points on G1 that are in preprocessed form
@@ -201,7 +201,7 @@ where
     }
 
     let ck: Vec<G1Affine<E>> = (0..num_gens)
-      .into_par_iter()
+      .into_iter()
       .map(|i| (<E::GE as DlogGroup>::gen() * powers_of_tau[i]).affine())
       .collect();
 
@@ -433,9 +433,9 @@ where
       // The verifier needs f_i(u_j), so we compute them here
       // (V will compute B(u_j) itself)
       let mut v = vec![vec!(E::Scalar::ZERO; k); t];
-      v.par_iter_mut().enumerate().for_each(|(i, v_i)| {
+      v.iter_mut().enumerate().for_each(|(i, v_i)| {
         // for each point u
-        v_i.par_iter_mut().zip_eq(f).for_each(|(v_ij, f)| {
+        v_i.iter_mut().zip_eq(f).for_each(|(v_ij, f)| {
           // for each poly f
           // for each poly f (except the last one - since it is constant)
           *v_ij = poly_eval(f, u[i]);
@@ -447,7 +447,7 @@ where
 
       // Now open B at u0, ..., u_{t-1}
       let w = u
-        .into_par_iter()
+        .into_iter()
         .map(|ui| kzg_open(&B, *ui))
         .collect::<Vec<G1Affine<E>>>();
 
@@ -474,7 +474,7 @@ where
       let mut Pi = vec![E::Scalar::ZERO; Pi_len];
 
       #[allow(clippy::needless_range_loop)]
-      Pi.par_iter_mut().enumerate().for_each(|(j, Pi_j)| {
+      Pi.iter_mut().enumerate().for_each(|(j, Pi_j)| {
         *Pi_j = x[ell - i - 1] * (polys[i][2 * j + 1] - polys[i][2 * j]) + polys[i][2 * j];
       });
 
@@ -484,7 +484,7 @@ where
     // We do not need to commit to the first polynomial as it is already committed.
     // Compute commitments in parallel
     let com: Vec<G1Affine<E>> = (1..polys.len())
-      .into_par_iter()
+      .into_iter()
       .map(|i| E::CE::commit(ck, &polys[i], &E::Scalar::ZERO).comm.affine())
       .collect();
 
@@ -557,14 +557,14 @@ where
       let q_power_multiplier = E::Scalar::ONE + d_0 + d_1;
 
       let q_powers_multiplied: Vec<E::Scalar> = q_powers
-        .par_iter()
+        .iter()
         .map(|q_power| *q_power * q_power_multiplier)
         .collect();
 
       // Compute the batched openings
       // compute B(u_i) = v[i][0] + q*v[i][1] + ... + q^(t-1) * v[i][t-1]
       let B_u = v
-        .into_par_iter()
+        .into_iter()
         .map(|v_i| zip_with!(iter, (q_powers, v_i), |a, b| *a * *b).sum())
         .collect::<Vec<E::Scalar>>();
 

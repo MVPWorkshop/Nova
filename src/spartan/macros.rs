@@ -94,9 +94,9 @@ macro_rules! zip_all {
         $e.$f()
     };
     ($f:ident, ($first:expr, $second:expr $(, $rest:expr)*)) => {
-        ($first.$f().zip_eq($crate::zip_all!($f, ($second, $( $rest),*))))
+        ($first.$f().zip($crate::zip_all!($f, ($second, $( $rest),*))))
     };
     (($first:expr, $second:expr $(, $rest:expr)*)) => {
-        ($first.zip_eq($crate::zip_all!(($second, $( $rest),*))))
+        ($first.zip($crate::zip_all!(($second, $( $rest),*))))
     };
 }

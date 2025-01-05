@@ -29,7 +29,6 @@ use ff::Field;
 use itertools::Itertools as _;
 // use once_cell::sync::OnceCell;
 
-use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
 /// A type that represents the prover's key
@@ -208,7 +207,7 @@ impl<E: Engine, EE: EvaluationEngineTrait<E>> RelaxedR1CSSNARKTrait<E> for Relax
       assert_eq!(evals_A.len(), evals_B.len());
       assert_eq!(evals_A.len(), evals_C.len());
       (0..evals_A.len())
-        .into_par_iter()
+        .into_iter()
         .map(|i| evals_A[i] + r * evals_B[i] + r * r * evals_C[i])
         .collect::<Vec<E::Scalar>>()
     };
@@ -357,7 +356,7 @@ impl<E: Engine, EE: EvaluationEngineTrait<E>> RelaxedR1CSSNARKTrait<E> for Relax
       let evaluate_with_table =
         |M: &SparseMatrix<E::Scalar>, T_x: &[E::Scalar], T_y: &[E::Scalar]| -> E::Scalar {
           M.indptr
-            .par_windows(2)
+            .windows(2)
             .enumerate()
             .map(|(row_idx, ptrs)| {
               M.get_row_unchecked(ptrs.try_into().unwrap())
@@ -367,13 +366,11 @@ impl<E: Engine, EE: EvaluationEngineTrait<E>> RelaxedR1CSSNARKTrait<E> for Relax
             .sum()
         };
 
-      let (T_x, T_y) = rayon::join(
-        || EqPolynomial::evals_from_points(r_x),
-        || EqPolynomial::evals_from_points(r_y),
-      );
+      let T_x = EqPolynomial::evals_from_points(r_x);
+      let T_y = EqPolynomial::evals_from_points(r_y);
 
       (0..M_vec.len())
-        .into_par_iter()
+        .into_iter()
         .map(|i| evaluate_with_table(M_vec[i], &T_x, &T_y))
         .collect()
     };

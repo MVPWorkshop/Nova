@@ -17,7 +17,7 @@ use halo2curves::{
   msm::best_multiexp,
 };
 use pasta_curves::arithmetic::{CurveAffine, CurveExt};
-use rayon::prelude::*;
+// use rayon::prelude::*;
 use sha3::Shake256;
 
 /// Re-exports that give access to the standard aliases used in the code base, for bn256

@@ -13,7 +13,7 @@ use crate::{
 use core::iter;
 use core::marker::PhantomData;
 use ff::Field;
-use rayon::prelude::*;
+// use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
 /// Provides an implementation of the prover key
@@ -102,9 +102,9 @@ where
 fn inner_product<T: Field + Send + Sync>(a: &[T], b: &[T]) -> T {
   assert_eq!(a.len(), b.len());
   (0..a.len())
-    .into_par_iter()
+    .into_iter()
     .map(|i| a[i] * b[i])
-    .reduce(|| T::ZERO, |x, y| x + y)
+    .fold(T::ZERO, |x, y| x + y)
 }
 
 /// An inner product instance consists of a commitment to a vector `a` and another vector `b`
@@ -241,14 +241,14 @@ where
 
       // fold the left half and the right half
       let a_vec_folded = a_vec[0..n / 2]
-        .par_iter()
-        .zip(a_vec[n / 2..n].par_iter())
+        .iter()
+        .zip(a_vec[n / 2..n].iter())
         .map(|(a_L, a_R)| *a_L * r + r_inverse * *a_R)
         .collect::<Vec<E::Scalar>>();
 
       let b_vec_folded = b_vec[0..n / 2]
-        .par_iter()
-        .zip(b_vec[n / 2..n].par_iter())
+        .iter()
+        .zip(b_vec[n / 2..n].iter())
         .map(|(b_L, b_R)| *b_L * r_inverse + r * *b_R)
         .collect::<Vec<E::Scalar>>();
 
@@ -348,12 +348,12 @@ where
 
     // precompute scalars necessary for verification
     let r_square: Vec<E::Scalar> = (0..self.L_vec.len())
-      .into_par_iter()
+      .into_iter()
       .map(|i| r[i] * r[i])
       .collect();
     let r_inverse = batch_invert(&r)?;
     let r_inverse_square: Vec<E::Scalar> = (0..self.L_vec.len())
-      .into_par_iter()
+      .into_iter()
       .map(|i| r_inverse[i] * r_inverse[i])
       .collect();
 

@@ -16,7 +16,7 @@ use halo2curves::{
 use num_bigint::BigInt;
 use num_traits::Num;
 use pasta_curves::arithmetic::{CurveAffine, CurveExt};
-use rayon::prelude::*;
+// use rayon::prelude::*;
 use sha3::Shake256;
 
 /// Re-exports that give access to the standard aliases used in the code base, for secp

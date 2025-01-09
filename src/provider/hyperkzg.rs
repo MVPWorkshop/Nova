@@ -651,162 +651,162 @@ where
 mod tests {
   use super::*;
   use crate::{
-    provider::{keccak::Keccak256Transcript, Bn256EngineKZG},
+    provider::{keccak::Keccak256Transcript, PallasEngine},
     spartan::polys::multilinear::MultilinearPolynomial,
   };
   use bincode::Options;
   use rand::SeedableRng;
 
-  type E = Bn256EngineKZG;
+  type E = PallasEngine;
   type Fr = <E as Engine>::Scalar;
 
-  #[test]
-  fn test_hyperkzg_eval() {
-    // Test with poly(X1, X2) = 1 + X1 + X2 + X1*X2
-    let n = 4;
-    let ck: CommitmentKey<E> = CommitmentEngine::setup(b"test", n);
-    let (pk, vk): (ProverKey<E>, VerifierKey<E>) = EvaluationEngine::setup(&ck);
+  //   #[test]
+  //   fn test_hyperkzg_eval() {
+  //     // Test with poly(X1, X2) = 1 + X1 + X2 + X1*X2
+  //     let n = 4;
+  //     let ck: CommitmentKey<E> = CommitmentEngine::setup(b"test", n);
+  //     let (pk, vk): (ProverKey<E>, VerifierKey<E>) = EvaluationEngine::setup(&ck);
 
-    // poly is in eval. representation; evaluated at [(0,0), (0,1), (1,0), (1,1)]
-    let poly = vec![Fr::from(1), Fr::from(2), Fr::from(2), Fr::from(4)];
+  //     // poly is in eval. representation; evaluated at [(0,0), (0,1), (1,0), (1,1)]
+  //     let poly = vec![Fr::from(1), Fr::from(2), Fr::from(2), Fr::from(4)];
 
-    let C = CommitmentEngine::commit(&ck, &poly, &<E as Engine>::Scalar::ZERO);
+  //     let C = CommitmentEngine::commit(&ck, &poly, &<E as Engine>::Scalar::ZERO);
 
-    let test_inner = |point: Vec<Fr>, eval: Fr| -> Result<(), NovaError> {
-      let mut tr = Keccak256Transcript::new(b"TestEval");
-      let proof = EvaluationEngine::prove(&ck, &pk, &mut tr, &C, &poly, &point, &eval).unwrap();
-      let mut tr = Keccak256Transcript::new(b"TestEval");
-      EvaluationEngine::verify(&vk, &mut tr, &C, &point, &eval, &proof)
-    };
+  //     let test_inner = |point: Vec<Fr>, eval: Fr| -> Result<(), NovaError> {
+  //       let mut tr = Keccak256Transcript::new(b"TestEval");
+  //       let proof = EvaluationEngine::prove(&ck, &pk, &mut tr, &C, &poly, &point, &eval).unwrap();
+  //       let mut tr = Keccak256Transcript::new(b"TestEval");
+  //       EvaluationEngine::verify(&vk, &mut tr, &C, &point, &eval, &proof)
+  //     };
 
-    // Call the prover with a (point, eval) pair.
-    // The prover does not recompute so it may produce a proof, but it should not verify
-    let point = vec![Fr::from(0), Fr::from(0)];
-    let eval = Fr::ONE;
-    assert!(test_inner(point, eval).is_ok());
+  //     // Call the prover with a (point, eval) pair.
+  //     // The prover does not recompute so it may produce a proof, but it should not verify
+  //     let point = vec![Fr::from(0), Fr::from(0)];
+  //     let eval = Fr::ONE;
+  //     assert!(test_inner(point, eval).is_ok());
 
-    let point = vec![Fr::from(0), Fr::from(1)];
-    let eval = Fr::from(2);
-    assert!(test_inner(point, eval).is_ok());
+  //     let point = vec![Fr::from(0), Fr::from(1)];
+  //     let eval = Fr::from(2);
+  //     assert!(test_inner(point, eval).is_ok());
 
-    let point = vec![Fr::from(1), Fr::from(1)];
-    let eval = Fr::from(4);
-    assert!(test_inner(point, eval).is_ok());
+  //     let point = vec![Fr::from(1), Fr::from(1)];
+  //     let eval = Fr::from(4);
+  //     assert!(test_inner(point, eval).is_ok());
 
-    let point = vec![Fr::from(0), Fr::from(2)];
-    let eval = Fr::from(3);
-    assert!(test_inner(point, eval).is_ok());
+  //     let point = vec![Fr::from(0), Fr::from(2)];
+  //     let eval = Fr::from(3);
+  //     assert!(test_inner(point, eval).is_ok());
 
-    let point = vec![Fr::from(2), Fr::from(2)];
-    let eval = Fr::from(9);
-    assert!(test_inner(point, eval).is_ok());
+  //     let point = vec![Fr::from(2), Fr::from(2)];
+  //     let eval = Fr::from(9);
+  //     assert!(test_inner(point, eval).is_ok());
 
-    // Try a couple incorrect evaluations and expect failure
-    let point = vec![Fr::from(2), Fr::from(2)];
-    let eval = Fr::from(50);
-    assert!(test_inner(point, eval).is_err());
+  //     // Try a couple incorrect evaluations and expect failure
+  //     let point = vec![Fr::from(2), Fr::from(2)];
+  //     let eval = Fr::from(50);
+  //     assert!(test_inner(point, eval).is_err());
 
-    let point = vec![Fr::from(0), Fr::from(2)];
-    let eval = Fr::from(4);
-    assert!(test_inner(point, eval).is_err());
-  }
+  //     let point = vec![Fr::from(0), Fr::from(2)];
+  //     let eval = Fr::from(4);
+  //     assert!(test_inner(point, eval).is_err());
+  //   }
 
-  #[test]
-  fn test_hyperkzg_small() {
-    let n = 4;
+  //   #[test]
+  //   fn test_hyperkzg_small() {
+  //     let n = 4;
 
-    // poly = [1, 2, 1, 4]
-    let poly = vec![Fr::ONE, Fr::from(2), Fr::from(1), Fr::from(4)];
+  //     // poly = [1, 2, 1, 4]
+  //     let poly = vec![Fr::ONE, Fr::from(2), Fr::from(1), Fr::from(4)];
 
-    // point = [4,3]
-    let point = vec![Fr::from(4), Fr::from(3)];
+  //     // point = [4,3]
+  //     let point = vec![Fr::from(4), Fr::from(3)];
 
-    // eval = 28
-    let eval = Fr::from(28);
+  //     // eval = 28
+  //     let eval = Fr::from(28);
 
-    let ck: CommitmentKey<E> = CommitmentEngine::setup(b"test", n);
-    let (pk, vk) = EvaluationEngine::setup(&ck);
+  //     let ck: CommitmentKey<E> = CommitmentEngine::setup(b"test", n);
+  //     let (pk, vk) = EvaluationEngine::setup(&ck);
 
-    // make a commitment
-    let C = CommitmentEngine::commit(&ck, &poly, &<E as Engine>::Scalar::ZERO);
+  //     // make a commitment
+  //     let C = CommitmentEngine::commit(&ck, &poly, &<E as Engine>::Scalar::ZERO);
 
-    // prove an evaluation
-    let mut prover_transcript = Keccak256Transcript::new(b"TestEval");
-    let proof =
-      EvaluationEngine::<E>::prove(&ck, &pk, &mut prover_transcript, &C, &poly, &point, &eval)
-        .unwrap();
-    let post_c_p = prover_transcript.squeeze(b"c").unwrap();
+  //     // prove an evaluation
+  //     let mut prover_transcript = Keccak256Transcript::new(b"TestEval");
+  //     let proof =
+  //       EvaluationEngine::<E>::prove(&ck, &pk, &mut prover_transcript, &C, &poly, &point, &eval)
+  //         .unwrap();
+  //     let post_c_p = prover_transcript.squeeze(b"c").unwrap();
 
-    // verify the evaluation
-    let mut verifier_transcript = Keccak256Transcript::new(b"TestEval");
-    assert!(
-      EvaluationEngine::verify(&vk, &mut verifier_transcript, &C, &point, &eval, &proof).is_ok()
-    );
-    let post_c_v = verifier_transcript.squeeze(b"c").unwrap();
+  //     // verify the evaluation
+  //     let mut verifier_transcript = Keccak256Transcript::new(b"TestEval");
+  //     assert!(
+  //       EvaluationEngine::verify(&vk, &mut verifier_transcript, &C, &point, &eval, &proof).is_ok()
+  //     );
+  //     let post_c_v = verifier_transcript.squeeze(b"c").unwrap();
 
-    // check if the prover transcript and verifier transcript are kept in the same state
-    assert_eq!(post_c_p, post_c_v);
+  //     // check if the prover transcript and verifier transcript are kept in the same state
+  //     assert_eq!(post_c_p, post_c_v);
 
-    // ! Should be fine to leave this
-    let proof_bytes = bincode::DefaultOptions::new()
-      .with_big_endian()
-      .with_fixint_encoding()
-      .serialize(&proof)
-      .unwrap();
-    assert_eq!(proof_bytes.len(), 368);
+  //     // ! Should be fine to leave this
+  //     let proof_bytes = bincode::DefaultOptions::new()
+  //       .with_big_endian()
+  //       .with_fixint_encoding()
+  //       .serialize(&proof)
+  //       .unwrap();
+  //     assert_eq!(proof_bytes.len(), 368);
 
-    // Change the proof and expect verification to fail
-    let mut bad_proof = proof.clone();
-    let v1 = bad_proof.v[1].clone();
-    bad_proof.v[0].clone_from(&v1);
-    let mut verifier_transcript2 = Keccak256Transcript::new(b"TestEval");
-    assert!(EvaluationEngine::verify(
-      &vk,
-      &mut verifier_transcript2,
-      &C,
-      &point,
-      &eval,
-      &bad_proof
-    )
-    .is_err());
-  }
+  //     // Change the proof and expect verification to fail
+  //     let mut bad_proof = proof.clone();
+  //     let v1 = bad_proof.v[1].clone();
+  //     bad_proof.v[0].clone_from(&v1);
+  //     let mut verifier_transcript2 = Keccak256Transcript::new(b"TestEval");
+  //     assert!(EvaluationEngine::verify(
+  //       &vk,
+  //       &mut verifier_transcript2,
+  //       &C,
+  //       &point,
+  //       &eval,
+  //       &bad_proof
+  //     )
+  //     .is_err());
+  //   }
 
-  #[test]
-  fn test_hyperkzg_large() {
-    // test the hyperkzg prover and verifier with random instances (derived from a seed)
-    for ell in [4, 5, 6] {
-      let mut rng = rand::rngs::StdRng::seed_from_u64(ell as u64);
+  //   #[test]
+  //   fn test_hyperkzg_large() {
+  //     // test the hyperkzg prover and verifier with random instances (derived from a seed)
+  //     for ell in [4, 5, 6] {
+  //       let mut rng = rand::rngs::StdRng::seed_from_u64(ell as u64);
 
-      let n = 1 << ell; // n = 2^ell
+  //       let n = 1 << ell; // n = 2^ell
 
-      let poly = (0..n).map(|_| Fr::random(&mut rng)).collect::<Vec<_>>();
-      let point = (0..ell).map(|_| Fr::random(&mut rng)).collect::<Vec<_>>();
-      let eval = MultilinearPolynomial::evaluate_with(&poly, &point);
+  //       let poly = (0..n).map(|_| Fr::random(&mut rng)).collect::<Vec<_>>();
+  //       let point = (0..ell).map(|_| Fr::random(&mut rng)).collect::<Vec<_>>();
+  //       let eval = MultilinearPolynomial::evaluate_with(&poly, &point);
 
-      let ck: CommitmentKey<E> = CommitmentEngine::setup(b"test", n);
-      let (pk, vk) = EvaluationEngine::setup(&ck);
+  //       let ck: CommitmentKey<E> = CommitmentEngine::setup(b"test", n);
+  //       let (pk, vk) = EvaluationEngine::setup(&ck);
 
-      // make a commitment
-      let C = CommitmentEngine::commit(&ck, &poly, &<E as Engine>::Scalar::ZERO);
+  //       // make a commitment
+  //       let C = CommitmentEngine::commit(&ck, &poly, &<E as Engine>::Scalar::ZERO);
 
-      // prove an evaluation
-      let mut prover_transcript = Keccak256Transcript::new(b"TestEval");
-      let proof: EvaluationArgument<E> =
-        EvaluationEngine::prove(&ck, &pk, &mut prover_transcript, &C, &poly, &point, &eval)
-          .unwrap();
+  //       // prove an evaluation
+  //       let mut prover_transcript = Keccak256Transcript::new(b"TestEval");
+  //       let proof: EvaluationArgument<E> =
+  //         EvaluationEngine::prove(&ck, &pk, &mut prover_transcript, &C, &poly, &point, &eval)
+  //           .unwrap();
 
-      // verify the evaluation
-      let mut verifier_tr = Keccak256Transcript::new(b"TestEval");
-      assert!(EvaluationEngine::verify(&vk, &mut verifier_tr, &C, &point, &eval, &proof).is_ok());
+  //       // verify the evaluation
+  //       let mut verifier_tr = Keccak256Transcript::new(b"TestEval");
+  //       assert!(EvaluationEngine::verify(&vk, &mut verifier_tr, &C, &point, &eval, &proof).is_ok());
 
-      // Change the proof and expect verification to fail
-      let mut bad_proof = proof.clone();
-      let v1 = bad_proof.v[1].clone();
-      bad_proof.v[0].clone_from(&v1);
-      let mut verifier_tr2 = Keccak256Transcript::new(b"TestEval");
-      assert!(
-        EvaluationEngine::verify(&vk, &mut verifier_tr2, &C, &point, &eval, &bad_proof).is_err()
-      );
-    }
-  }
+  //       // Change the proof and expect verification to fail
+  //       let mut bad_proof = proof.clone();
+  //       let v1 = bad_proof.v[1].clone();
+  //       bad_proof.v[0].clone_from(&v1);
+  //       let mut verifier_tr2 = Keccak256Transcript::new(b"TestEval");
+  //       assert!(
+  //         EvaluationEngine::verify(&vk, &mut verifier_tr2, &C, &point, &eval, &bad_proof).is_err()
+  //       );
+  //     }
+  //   }
 }

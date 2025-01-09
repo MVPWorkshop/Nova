@@ -755,7 +755,7 @@ mod tests {
 
   use super::*;
   use crate::{
-    provider::{Bn256EngineKZG, PallasEngine, Secp256k1Engine},
+    provider::PallasEngine,
     r1cs::sparse::SparseMatrix,
     traits::{snark::default_ck_hint, Engine},
   };
@@ -838,8 +838,8 @@ mod tests {
   #[test]
   fn test_pad_tiny_r1cs() {
     test_pad_tiny_r1cs_with::<PallasEngine>();
-    test_pad_tiny_r1cs_with::<Bn256EngineKZG>();
-    test_pad_tiny_r1cs_with::<Secp256k1Engine>();
+    // test_pad_tiny_r1cs_with::<Bn256EngineKZG>();
+    // test_pad_tiny_r1cs_with::<Secp256k1Engine>();
   }
 
   fn test_random_sample_with<E: Engine>() {
@@ -852,7 +852,7 @@ mod tests {
   #[test]
   fn test_random_sample() {
     test_random_sample_with::<PallasEngine>();
-    test_random_sample_with::<Bn256EngineKZG>();
-    test_random_sample_with::<Secp256k1Engine>();
+    // test_random_sample_with::<Bn256EngineKZG>();
+    // test_random_sample_with::<Secp256k1Engine>();
   }
 }

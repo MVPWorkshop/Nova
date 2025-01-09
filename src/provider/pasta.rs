@@ -6,6 +6,8 @@ use crate::{
 };
 use digest::{ExtendableOutput, Update, XofReader};
 use ff::{FromUniformBytes, PrimeField};
+// TODO -> Remove this
+// use ark_ec::VariableBaseMSM;
 use halo2curves::msm::best_multiexp;
 use num_bigint::BigInt;
 use num_traits::Num;
@@ -47,6 +49,8 @@ macro_rules! impl_traits {
         scalars: &[Self::Scalar],
         bases: &[Self::AffineGroupElement],
       ) -> Self {
+        // unimplemented!()
+        // ark_ec::VariableBaseMSM::msm(scalars, bases).unwrap()
         best_multiexp(scalars, bases)
       }
 

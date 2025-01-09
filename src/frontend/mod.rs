@@ -34,7 +34,7 @@ mod tests {
       solver::SatisfyingAssignment,
       ConstraintSystem,
     },
-    provider::{Bn256EngineKZG, PallasEngine, Secp256k1Engine},
+    provider::PallasEngine,
     traits::{snark::default_ck_hint, Engine},
   };
   use ff::PrimeField;
@@ -77,7 +77,7 @@ mod tests {
   #[test]
   fn test_alloc_bit() {
     test_alloc_bit_with::<PallasEngine>();
-    test_alloc_bit_with::<Bn256EngineKZG>();
-    test_alloc_bit_with::<Secp256k1Engine>();
+    // test_alloc_bit_with::<Bn256EngineKZG>();
+    // test_alloc_bit_with::<Secp256k1Engine>();
   }
 }

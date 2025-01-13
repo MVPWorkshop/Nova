@@ -20,6 +20,8 @@ use pasta_curves::{
 // use rayon::prelude::*;
 use sha3::Shake256;
 
+use num_traits::float::FloatCore;
+
 macro_rules! impl_traits {
   (
     $name:ident,

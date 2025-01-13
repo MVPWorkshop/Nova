@@ -1,6 +1,8 @@
 use crate::prelude::*;
 use ff::PrimeField;
 
+use num_traits::float::FloatCore;
+
 /// From the paper ():
 /// The round constants are generated using the Grain LFSR [23] in a self-shrinking
 /// mode:

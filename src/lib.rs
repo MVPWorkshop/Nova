@@ -14,6 +14,7 @@
 #[cfg(not(feature = "std"))]
 extern crate alloc;
 
+// TODO -> Put cfg flag on mod, and not on imports inside mod
 pub(crate) mod prelude {
   #[cfg(not(feature = "std"))]
   pub use alloc::borrow::ToOwned;
@@ -35,8 +36,6 @@ pub(crate) mod prelude {
   pub use alloc::collections::BTreeMap;
   #[cfg(not(feature = "std"))]
   pub use alloc::collections::VecDeque;
-  #[cfg(not(feature = "std"))]
-  pub use hashbrown::HashMap;
   #[cfg(feature = "std")]
   pub use std::collections::{BTreeMap, HashMap, VecDeque};
 }

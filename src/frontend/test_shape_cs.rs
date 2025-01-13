@@ -9,6 +9,11 @@ use crate::{
 use core::{cmp::Ordering, fmt::Write};
 use ff::{Field, PrimeField};
 
+#[cfg(not(feature = "std"))]
+use core::hash::BuildHasherDefault;
+#[cfg(not(feature = "std"))]
+use hashbrown::HashMap;
+
 #[derive(Clone, Copy)]
 struct OrderedVariable(Variable);
 

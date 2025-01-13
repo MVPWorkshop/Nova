@@ -16,7 +16,11 @@ use crate::{
 use core::{cmp::max, marker::PhantomData};
 use ff::Field;
 // use once_cell::sync::OnceCell;
-use rand_core::OsRng;
+
+use rand_chacha::ChaCha20Rng;
+use rand_core::SeedableRng;
+
+// use rand_core::OsRng;
 // use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
@@ -396,13 +400,14 @@ impl<E: Engine> R1CSShape<E> {
     ck: &CommitmentKey<E>,
   ) -> Result<(RelaxedR1CSInstance<E>, RelaxedR1CSWitness<E>), NovaError> {
     // sample Z = (W, u, X)
+    let mut rng = ChaCha20Rng::seed_from_u64(0xDEADBEEF);
     let Z = (0..self.num_vars + self.num_io + 1)
       .into_iter()
-      .map(|_| E::Scalar::random(&mut OsRng))
+      .map(|_| E::Scalar::random(&mut rng))
       .collect::<Vec<E::Scalar>>();
 
-    let r_W = E::Scalar::random(&mut OsRng);
-    let r_E = E::Scalar::random(&mut OsRng);
+    let r_W = E::Scalar::random(&mut rng);
+    let r_E = E::Scalar::random(&mut rng);
 
     let u = Z[self.num_vars];
 
@@ -444,9 +449,10 @@ impl<E: Engine> R1CSWitness<E> {
     if S.num_vars != W.len() {
       Err(NovaError::InvalidWitnessLength)
     } else {
+      let mut rng = ChaCha20Rng::seed_from_u64(0xDEADBEEF);
       Ok(R1CSWitness {
         W: W.to_owned(),
-        r_W: E::Scalar::random(&mut OsRng),
+        r_W: E::Scalar::random(&mut rng),
       })
     }
   }

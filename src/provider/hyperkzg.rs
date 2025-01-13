@@ -23,7 +23,10 @@ use core::{
 };
 use ff::Field;
 use itertools::Itertools;
-use rand_core::OsRng;
+
+use rand_chacha::ChaCha20Rng;
+use rand_core::SeedableRng;
+// use rand_core::OsRng;
 // use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
@@ -190,7 +193,9 @@ where
   fn setup(label: &'static [u8], n: usize) -> Self::CommitmentKey {
     // NOTE: this is for testing purposes and should not be used in production
     // TODO: we need to decide how to generate load/store parameters
-    let tau = E::Scalar::random(OsRng);
+
+    let mut rng = ChaCha20Rng::seed_from_u64(0xDEADBEEF);
+    let tau = E::Scalar::random(rng);
     let num_gens = n.next_power_of_two();
 
     // Compute powers of tau in E::Scalar, then scalar muls in parallel

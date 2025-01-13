@@ -75,7 +75,11 @@ use prelude::*;
 use r1cs::{
   CommitmentKeyHint, R1CSInstance, R1CSShape, R1CSWitness, RelaxedR1CSInstance, RelaxedR1CSWitness,
 };
-use rand_core::OsRng;
+
+use rand_chacha::ChaCha20Rng;
+use rand_core::SeedableRng;
+// use rand_core::OsRng;
+
 use serde::{Deserialize, Serialize};
 use traits::{
   circuit::StepCircuit, commitment::CommitmentEngineTrait, snark::RelaxedR1CSSNARKTrait,
@@ -316,9 +320,10 @@ where
     if z0_primary.len() != pp.F_arity_primary || z0_secondary.len() != pp.F_arity_secondary {
       return Err(NovaError::InvalidInitialInputLength);
     }
+    let mut rng = ChaCha20Rng::seed_from_u64(0xDEADBEEF);
 
-    let ri_primary = E1::Scalar::random(&mut OsRng);
-    let ri_secondary = E2::Scalar::random(&mut OsRng);
+    let ri_primary = E1::Scalar::random(&mut rng);
+    let ri_secondary = E2::Scalar::random(&mut rng);
 
     // base case for the primary
     let mut cs_primary = SatisfyingAssignment::<E1>::new();
@@ -441,7 +446,8 @@ where
       &self.l_w_secondary,
     )?;
 
-    let r_next_primary = E1::Scalar::random(&mut OsRng);
+    let mut rng = ChaCha20Rng::seed_from_u64(0xDEADBEEF);
+    let r_next_primary = E1::Scalar::random(&mut rng);
 
     let mut cs_primary = SatisfyingAssignment::<E1>::new();
     let inputs_primary: NovaAugmentedCircuitInputs<E2> = NovaAugmentedCircuitInputs::new(
@@ -480,7 +486,7 @@ where
       &l_w_primary,
     )?;
 
-    let r_next_secondary = E2::Scalar::random(&mut OsRng);
+    let r_next_secondary = E2::Scalar::random(&mut rng);
 
     let mut cs_secondary = SatisfyingAssignment::<E2>::new();
     let inputs_secondary: NovaAugmentedCircuitInputs<E1> = NovaAugmentedCircuitInputs::new(
@@ -1480,7 +1486,7 @@ mod tests {
     impl<F: PrimeField> FifthRootCheckingCircuit<F> {
       fn new(num_steps: usize) -> (Vec<F>, Vec<Self>) {
         let mut powers = Vec::new();
-        let rng = &mut rand::rngs::OsRng;
+        let rng = ChaCha20Rng::seed_from_u64(0xDEADBEEF);
         let mut seed = F::random(rng);
         for _i in 0..num_steps + 1 {
           seed *= seed.clone().square().square();

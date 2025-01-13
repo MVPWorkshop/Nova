@@ -8,7 +8,7 @@ use digest::{ExtendableOutput, Update, XofReader};
 use ff::{FromUniformBytes, PrimeField};
 // TODO -> Remove this
 // use ark_ec::VariableBaseMSM;
-use halo2curves::msm::best_multiexp;
+// use halo2curves::msm::best_multiexp;
 use num_bigint::BigInt;
 use num_traits::Num;
 use pasta_curves::{
@@ -49,9 +49,9 @@ macro_rules! impl_traits {
         scalars: &[Self::Scalar],
         bases: &[Self::AffineGroupElement],
       ) -> Self {
-        // unimplemented!()
+        unimplemented!()
         // ark_ec::VariableBaseMSM::msm(scalars, bases).unwrap()
-        best_multiexp(scalars, bases)
+        // best_multiexp(scalars, bases)
       }
 
       fn affine(&self) -> Self::AffineGroupElement {

@@ -1,6 +1,6 @@
 use crate::{prelude::*, NovaError, NUM_HASH_BITS};
 
-// #[cfg(feature = "std")]
+#[cfg(feature = "std")]
 use bincode::{DefaultOptions, Options};
 
 use core::marker::PhantomData;

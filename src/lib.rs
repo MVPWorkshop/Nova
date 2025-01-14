@@ -1024,6 +1024,8 @@ mod tests {
   use expect_test::{expect, Expect};
   use ff::PrimeField;
   use frontend::{num::AllocatedNum, ConstraintSystem, SynthesisError};
+  use std::fs::File;
+  use std::io::Write as Writee;
 
   type EE<E> = provider::ipa_pc::EvaluationEngine<E>;
   type EEPrime<E> = provider::hyperkzg::EvaluationEngine<E>;
@@ -1340,7 +1342,15 @@ mod tests {
       CompressedSNARK::<_, _, _, _, S<E1, EE1>, S<E2, EE2>>::prove(&mut pp, &pk, &recursive_snark);
     assert!(res.is_ok());
     let compressed_snark = res.unwrap();
+    let json_data = serde_json::to_string_pretty(&compressed_snark).unwrap();
+    let mut file = File::create("./compressed_snark.json").unwrap();
+    file.write_all(json_data.as_bytes()).unwrap();
 
+    let json_data = serde_json::to_string_pretty(&vk).unwrap();
+    let mut file = File::create("./verifying_key.json").unwrap();
+    file.write_all(json_data.as_bytes()).unwrap();
+
+    print!("{}", num_steps);
     // verify the compressed SNARK
     let res = compressed_snark.verify(
       &mut vk,
@@ -1353,6 +1363,7 @@ mod tests {
 
   #[test]
   fn test_ivc_nontrivial_with_compression() {
+    // TODO -> THIS TEST
     test_ivc_nontrivial_with_compression_with::<PallasEngine, VestaEngine, EE<_>, EE<_>>();
     // test_ivc_nontrivial_with_compression_with::<Bn256EngineKZG, GrumpkinEngine, EEPrime<_>, EE<_>>(
     // );
@@ -1458,6 +1469,7 @@ mod tests {
 
   #[test]
   fn test_ivc_nontrivial_with_spark_compression() {
+    // TODO -> THIS TEST
     test_ivc_nontrivial_with_spark_compression_with::<PallasEngine, VestaEngine, EE<_>, EE<_>>();
     // test_ivc_nontrivial_with_spark_compression_with::<
     //   Bn256EngineKZG,
@@ -1605,6 +1617,7 @@ mod tests {
 
   #[test]
   fn test_ivc_nondet_with_compression() {
+    // TODO -> THIS TEST
     test_ivc_nondet_with_compression_with::<PallasEngine, VestaEngine, EE<_>, EE<_>>();
     // test_ivc_nondet_with_compression_with::<Bn256EngineKZG, GrumpkinEngine, EEPrime<_>, EE<_>>();
     // test_ivc_nondet_with_compression_with::<Secp256k1Engine, Secq256k1Engine, EE<_>, EE<_>>();

@@ -21,7 +21,7 @@ pub trait Digestible {
 pub trait SimpleDigestible: Serialize {}
 
 impl<T: SimpleDigestible> Digestible for T {
-  // #[cfg(feature = "std")]
+  #[cfg(feature = "std")]
   fn write_bytes(&self) -> Result<Vec<u8>, NovaError> {
     let config = DefaultOptions::new()
       .with_little_endian()
@@ -32,12 +32,12 @@ impl<T: SimpleDigestible> Digestible for T {
     })
   }
 
-  // #[cfg(not(feature = "std"))]
-  // fn write_bytes(&self) -> Result<Vec<u8>, NovaError> {
-  //   postcard::to_allocvec(self).map_err(|e| NovaError::DigestError {
-  //     reason: e.to_string(),
-  //   })
-  // }
+  #[cfg(not(feature = "std"))]
+  fn write_bytes(&self) -> Result<Vec<u8>, NovaError> {
+    postcard::to_allocvec(self).map_err(|e| NovaError::DigestError {
+      reason: e.to_string(),
+    })
+  }
 }
 
 /// Compute the digest of a `Digestible` instance.

@@ -1342,13 +1342,13 @@ mod tests {
       CompressedSNARK::<_, _, _, _, S<E1, EE1>, S<E2, EE2>>::prove(&mut pp, &pk, &recursive_snark);
     assert!(res.is_ok());
     let compressed_snark = res.unwrap();
-    let json_data = serde_json::to_string_pretty(&compressed_snark).unwrap();
-    let mut file = File::create("./compressed_snark.json").unwrap();
-    file.write_all(json_data.as_bytes()).unwrap();
+    // let json_data = serde_json::to_string_pretty(&compressed_snark).unwrap();
+    // let mut file = File::create("./compressed_snark.json").unwrap();
+    // file.write_all(json_data.as_bytes()).unwrap();
 
-    let json_data = serde_json::to_string_pretty(&vk).unwrap();
-    let mut file = File::create("./verifying_key.json").unwrap();
-    file.write_all(json_data.as_bytes()).unwrap();
+    // let json_data = serde_json::to_string_pretty(&vk).unwrap();
+    // let mut file = File::create("./verifying_key.json").unwrap();
+    // file.write_all(json_data.as_bytes()).unwrap();
 
     print!("{}", num_steps);
     // verify the compressed SNARK

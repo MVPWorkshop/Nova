@@ -1,7 +1,7 @@
 use crate::{prelude::*, NovaError, NUM_HASH_BITS};
 
-#[cfg(feature = "std")]
-use bincode::{DefaultOptions, Options};
+// #[cfg(feature = "std")]
+// use bincode::{DefaultOptions, Options};
 
 use core::marker::PhantomData;
 use ff::PrimeField;
@@ -21,18 +21,18 @@ pub trait Digestible {
 pub trait SimpleDigestible: Serialize {}
 
 impl<T: SimpleDigestible> Digestible for T {
-  #[cfg(feature = "std")]
-  fn write_bytes(&self) -> Result<Vec<u8>, NovaError> {
-    let config = DefaultOptions::new()
-      .with_little_endian()
-      .with_fixint_encoding();
-    // Serialize into a Vec<u8> and return it
-    config.serialize(self).map_err(|e| NovaError::DigestError {
-      reason: e.to_string(),
-    })
-  }
+  // #[cfg(feature = "std")]
+  // fn write_bytes(&self) -> Result<Vec<u8>, NovaError> {
+  //   let config = DefaultOptions::new()
+  //     .with_little_endian()
+  //     .with_fixint_encoding();
+  //   // Serialize into a Vec<u8> and return it
+  //   config.serialize(self).map_err(|e| NovaError::DigestError {
+  //     reason: e.to_string(),
+  //   })
+  // }
 
-  #[cfg(not(feature = "std"))]
+  // #[cfg(not(feature = "std"))]
   fn write_bytes(&self) -> Result<Vec<u8>, NovaError> {
     postcard::to_allocvec(self).map_err(|e| NovaError::DigestError {
       reason: e.to_string(),

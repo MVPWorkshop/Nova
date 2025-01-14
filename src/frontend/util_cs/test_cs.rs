@@ -4,6 +4,7 @@ use crate::{
   prelude::*,
 };
 use ff::PrimeField;
+use hashbrown::HashMap;
 
 #[derive(Debug)]
 enum NamedObject {

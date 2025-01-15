@@ -17,12 +17,9 @@ mod keccak;
 
 use crate::{
   provider::{
-    // bn256_grumpkin::{bn256, grumpkin},
-    hyperkzg::CommitmentEngine as HyperKZGCommitmentEngine,
     keccak::Keccak256Transcript,
     pedersen::CommitmentEngine as PedersenCommitmentEngine,
     poseidon::{PoseidonRO, PoseidonROCircuit},
-    // secp_secq::{secp256k1, secq256k1},
   },
   traits::Engine,
 };

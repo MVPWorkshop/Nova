@@ -33,8 +33,6 @@ use crate::{
 };
 use core::cmp::max;
 use ff::Field;
-use itertools::Itertools as _;
-// use once_cell::sync::OnceCell;
 use serde::{Deserialize, Serialize};
 
 fn padded<E: Engine>(v: &[E::Scalar], n: usize, e: &E::Scalar) -> Vec<E::Scalar> {

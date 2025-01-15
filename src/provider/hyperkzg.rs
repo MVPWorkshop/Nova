@@ -194,7 +194,7 @@ where
     // NOTE: this is for testing purposes and should not be used in production
     // TODO: we need to decide how to generate load/store parameters
 
-    let mut rng = ChaCha20Rng::seed_from_u64(0xDEADBEEF);
+    let rng = ChaCha20Rng::seed_from_u64(0xDEADBEEF);
     let tau = E::Scalar::random(rng);
     let num_gens = n.next_power_of_two();
 

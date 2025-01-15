@@ -8,11 +8,6 @@ use crate::{
 };
 use core::ops::{Add, Index};
 use ff::PrimeField;
-use itertools::Itertools as _;
-// use rayon::prelude::{
-//   IndexedParallelIterator, IntoParallelIterator, IntoParallelRefIterator,
-//   IntoParallelRefMutIterator, ParallelIterator,
-// };
 use serde::{Deserialize, Serialize};
 
 /// A multilinear extension of a polynomial $Z(\cdot)$, denote it as $\tilde{Z}(x_1, ..., x_m)$

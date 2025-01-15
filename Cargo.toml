@@ -76,4 +76,6 @@ name = "ppsnark"
 harness = false
 
 [features]
+default = ["std"]
+std = []
 flamegraph = ["pprof2/flamegraph", "pprof2/criterion"]

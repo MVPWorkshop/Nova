@@ -8,7 +8,6 @@ use crate::{
   traits::{Engine, TranscriptEngineTrait},
 };
 use ff::Field;
-use itertools::Itertools as _;
 use serde::{Deserialize, Serialize};
 
 /// Defines a trait for implementing sum-check in a generic manner

@@ -1025,8 +1025,6 @@ mod tests {
   use expect_test::{expect, Expect};
   use ff::PrimeField;
   use frontend::{num::AllocatedNum, ConstraintSystem, SynthesisError};
-  use std::fs::File;
-  use std::io::Write as Writee;
 
   type EE<E> = provider::ipa_pc::EvaluationEngine<E>;
   type EEPrime<E> = provider::hyperkzg::EvaluationEngine<E>;
@@ -1343,16 +1341,7 @@ mod tests {
       CompressedSNARK::<_, _, _, _, S<E1, EE1>, S<E2, EE2>>::prove(&mut pp, &pk, &recursive_snark);
     assert!(res.is_ok());
     let compressed_snark = res.unwrap();
-    let json_data = serde_json::to_string_pretty(&compressed_snark).unwrap();
-    let mut file = File::create("./compressed_snark.json").unwrap();
-    file.write_all(json_data.as_bytes()).unwrap();
 
-    let json_data = serde_json::to_string_pretty(&vk).unwrap();
-    let mut file = File::create("./verifying_key.json").unwrap();
-    file.write_all(json_data.as_bytes()).unwrap();
-
-    // print!("{}", num_steps);
-    // verify the compressed SNARK
     let res = compressed_snark.verify(
       &mut vk,
       num_steps,

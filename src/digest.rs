@@ -19,7 +19,6 @@ pub trait Digestible {
 pub trait SimpleDigestible: Serialize {}
 
 impl<T: SimpleDigestible> Digestible for T {
-  #[cfg(feature = "std")]
   fn write_bytes(&self) -> Result<Vec<u8>, NovaError> {
     postcard::to_allocvec(self).map_err(|e| NovaError::DigestError {
       reason: e.to_string(),

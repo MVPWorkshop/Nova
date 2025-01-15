@@ -49,7 +49,7 @@ fn bench_ppsnark(c: &mut Criterion) {
     let input = vec![<E as Engine>::Scalar::from(42)];
 
     // produce keys
-    let (pk, vk) =
+    let (pk, mut vk) =
       DirectSNARK::<E, S, NonTrivialCircuit<<E as Engine>::Scalar>>::setup(c.clone()).unwrap();
 
     // Bench time to produce a  ppSNARK;
@@ -75,7 +75,7 @@ fn bench_ppsnark(c: &mut Criterion) {
     let ppsnark = DirectSNARK::prove(&pk, c.clone(), &input).unwrap();
     group.bench_function("Verify", |b| {
       b.iter(|| {
-        assert!(ppsnark.verify(black_box(&vk), black_box(&io),).is_ok());
+        assert!(ppsnark.verify(black_box(&mut vk), black_box(&io),).is_ok());
       });
     });
     group.finish();

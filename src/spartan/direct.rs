@@ -85,7 +85,7 @@ where
 
 impl<E: Engine, S: RelaxedR1CSSNARKTrait<E>> VerifierKey<E, S> {
   /// Returns the digest of the verifier's key
-  pub fn digest(&self) -> E::Scalar {
+  pub fn digest(&mut self) -> E::Scalar {
     self.vk.digest()
   }
 }
@@ -169,7 +169,7 @@ impl<E: Engine, S: RelaxedR1CSSNARKTrait<E>, C: StepCircuit<E::Scalar>> DirectSN
   }
 
   /// Verifies a proof of satisfiability
-  pub fn verify(&self, vk: &VerifierKey<E, S>, io: &[E::Scalar]) -> Result<(), NovaError> {
+  pub fn verify(&self, vk: &mut VerifierKey<E, S>, io: &[E::Scalar]) -> Result<(), NovaError> {
     // derandomize/unblind commitments
     let comm_W = E::CE::derandomize(&vk.dk, &self.comm_W, &self.blind_r_W);
 
@@ -177,7 +177,7 @@ impl<E: Engine, S: RelaxedR1CSSNARKTrait<E>, C: StepCircuit<E::Scalar>> DirectSN
     let u_relaxed = RelaxedR1CSInstance::from_r1cs_instance_unchecked(&comm_W, io);
 
     // verify the snark using the constructed instance
-    self.snark.verify(&vk.vk, &u_relaxed)?;
+    self.snark.verify(&mut vk.vk, &u_relaxed)?;
 
     Ok(())
   }
@@ -272,7 +272,7 @@ mod tests {
     let circuit = CubicCircuit::default();
 
     // produce keys
-    let (pk, vk) =
+    let (pk, mut vk) =
       DirectSNARK::<E, S, CubicCircuit<<E as Engine>::Scalar>>::setup(circuit.clone()).unwrap();
 
     let num_steps = 3;
@@ -296,7 +296,7 @@ mod tests {
         .into_iter()
         .chain(z_i_plus_one.clone())
         .collect::<Vec<_>>();
-      let res = snark.verify(&vk, &io);
+      let res = snark.verify(&mut vk, &io);
       assert!(res.is_ok());
 
       // set input to the next step

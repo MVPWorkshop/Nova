@@ -113,7 +113,7 @@ fn main() {
     // produce public parameters
     let start = Instant::now();
     println!("Producing public parameters...");
-    let pp = PublicParams::<
+    let mut pp = PublicParams::<
       E1,
       E2,
       HashChainCircuit<<E1 as Engine>::GE>,
@@ -159,7 +159,7 @@ fn main() {
     );
     let mut recursive_snark: RecursiveSNARK<E1, E2, C1, C2> =
       RecursiveSNARK::<E1, E2, C1, C2>::new(
-        &pp,
+        &mut pp,
         &circuits[0],
         &circuit_secondary,
         &[<E1 as Engine>::Scalar::zero()],
@@ -169,7 +169,7 @@ fn main() {
 
     for (i, circuit_primary) in circuits.iter().enumerate() {
       let start = Instant::now();
-      let res = recursive_snark.prove_step(&pp, circuit_primary, &circuit_secondary);
+      let res = recursive_snark.prove_step(&mut pp, circuit_primary, &circuit_secondary);
       assert!(res.is_ok());
 
       println!("RecursiveSNARK::prove {} : took {:?} ", i, start.elapsed());
@@ -178,7 +178,7 @@ fn main() {
     // verify the recursive SNARK
     println!("Verifying a RecursiveSNARK...");
     let res = recursive_snark.verify(
-      &pp,
+      &mut pp,
       num_steps,
       &[<E1 as Engine>::Scalar::ZERO],
       &[<E2 as Engine>::Scalar::ZERO],
@@ -188,11 +188,11 @@ fn main() {
 
     // produce a compressed SNARK
     println!("Generating a CompressedSNARK using Spartan with HyperKZG...");
-    let (pk, vk) = CompressedSNARK::<_, _, _, _, S1, S2>::setup(&pp).unwrap();
+    let (pk, mut vk) = CompressedSNARK::<_, _, _, _, S1, S2>::setup(&mut pp).unwrap();
 
     let start = Instant::now();
 
-    let res = CompressedSNARK::<_, _, _, _, S1, S2>::prove(&pp, &pk, &recursive_snark);
+    let res = CompressedSNARK::<_, _, _, _, S1, S2>::prove(&mut pp, &pk, &recursive_snark);
     println!(
       "CompressedSNARK::prove: {:?}, took {:?}",
       res.is_ok(),
@@ -216,7 +216,7 @@ fn main() {
     println!("Verifying a CompressedSNARK...");
     let start = Instant::now();
     let res = compressed_snark.verify(
-      &vk,
+      &mut vk,
       num_steps,
       &[<E1 as Engine>::Scalar::ZERO],
       &[<E2 as Engine>::Scalar::ZERO],

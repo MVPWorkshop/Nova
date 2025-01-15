@@ -155,7 +155,7 @@ fn bench_recursive_snark(c: &mut Criterion) {
 
     // Produce public parameters
     let ttc = TrivialCircuit::default();
-    let pp = PublicParams::<E1, E2, C1, C2>::setup(
+    let mut pp = PublicParams::<E1, E2, C1, C2>::setup(
       &circuit_primary,
       &ttc,
       &*default_ck_hint(),
@@ -170,7 +170,7 @@ fn bench_recursive_snark(c: &mut Criterion) {
     group.bench_function("Prove", |b| {
       b.iter(|| {
         let mut recursive_snark = RecursiveSNARK::new(
-          black_box(&pp),
+          black_box(&mut pp),
           black_box(&circuit_primary),
           black_box(&circuit_secondary),
           black_box(&z0_primary),
@@ -181,7 +181,7 @@ fn bench_recursive_snark(c: &mut Criterion) {
         // produce a recursive SNARK for a step of the recursion
         assert!(recursive_snark
           .prove_step(
-            black_box(&pp),
+            black_box(&mut pp),
             black_box(&circuit_primary),
             black_box(&circuit_secondary),
           )

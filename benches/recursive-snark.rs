@@ -70,7 +70,7 @@ fn bench_recursive_snark(c: &mut Criterion) {
     let c_secondary = TrivialCircuit::default();
 
     // Produce public parameters
-    let pp = PublicParams::<E1, E2, C1, C2>::setup(
+    let mut pp = PublicParams::<E1, E2, C1, C2>::setup(
       &c_primary,
       &c_secondary,
       &*default_ck_hint(),
@@ -84,7 +84,7 @@ fn bench_recursive_snark(c: &mut Criterion) {
     // a lot of zeros in the satisfying assignment
     let num_warmup_steps = 10;
     let mut recursive_snark: RecursiveSNARK<E1, E2, C1, C2> = RecursiveSNARK::new(
-      &pp,
+      &mut pp,
       &c_primary,
       &c_secondary,
       &[<E1 as Engine>::Scalar::from(2u64)],
@@ -93,12 +93,12 @@ fn bench_recursive_snark(c: &mut Criterion) {
     .unwrap();
 
     for i in 0..num_warmup_steps {
-      let res = recursive_snark.prove_step(&pp, &c_primary, &c_secondary);
+      let res = recursive_snark.prove_step(&mut pp, &c_primary, &c_secondary);
       assert!(res.is_ok());
 
       // verify the recursive snark at each step of recursion
       let res = recursive_snark.verify(
-        &pp,
+        &mut pp,
         i + 1,
         &[<E1 as Engine>::Scalar::from(2u64)],
         &[<E2 as Engine>::Scalar::from(2u64)],
@@ -111,7 +111,7 @@ fn bench_recursive_snark(c: &mut Criterion) {
         // produce a recursive SNARK for a step of the recursion
         assert!(black_box(&mut recursive_snark.clone())
           .prove_step(
-            black_box(&pp),
+            black_box(&mut pp),
             black_box(&c_primary),
             black_box(&c_secondary),
           )
@@ -124,7 +124,7 @@ fn bench_recursive_snark(c: &mut Criterion) {
       b.iter(|| {
         assert!(black_box(&recursive_snark)
           .verify(
-            black_box(&pp),
+            black_box(&mut pp),
             black_box(num_warmup_steps),
             black_box(&[<E1 as Engine>::Scalar::from(2u64)]),
             black_box(&[<E2 as Engine>::Scalar::from(2u64)]),

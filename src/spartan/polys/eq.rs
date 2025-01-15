@@ -2,7 +2,7 @@
 
 use crate::prelude::*;
 use ff::PrimeField;
-use rayon::prelude::{IndexedParallelIterator, IntoParallelRefMutIterator, ParallelIterator};
+// use rayon::prelude::{IndexedParallelIterator, IntoParallelRefMutIterator, ParallelIterator};
 
 /// Represents the multilinear extension polynomial (MLE) of the equality polynomial $eq(x,e)$, denoted as $\tilde{eq}(x, e)$.
 ///
@@ -62,7 +62,7 @@ impl<Scalar: PrimeField> EqPolynomial<Scalar> {
       let (evals_left, evals_right) = evals.split_at_mut(size);
       let (evals_right, _) = evals_right.split_at_mut(size);
 
-      zip_with_for_each!(par_iter_mut, (evals_left, evals_right), |x, y| {
+      zip_with_for_each!(iter_mut, (evals_left, evals_right), |x, y| {
         *y = *x * r;
         *x -= &*y;
       });

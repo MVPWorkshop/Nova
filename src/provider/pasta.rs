@@ -15,7 +15,7 @@ use pasta_curves::{
   group::{cofactor::CofactorCurveAffine, Curve, Group as AnotherGroup},
   pallas, vesta, Ep, EpAffine, Eq, EqAffine,
 };
-use rayon::prelude::*;
+// use rayon::prelude::*;
 use sha3::Shake256;
 
 macro_rules! impl_traits {
@@ -69,18 +69,19 @@ macro_rules! impl_traits {
           uniform_bytes_vec.push(uniform_bytes);
         }
         let ck_proj: Vec<$name_curve> = (0..n)
-          .into_par_iter()
+          .into_iter()
           .map(|i| {
             let hash = $name_curve::hash_to_curve("from_uniform_bytes");
             hash(&uniform_bytes_vec[i])
           })
           .collect();
 
-        let num_threads = rayon::current_num_threads();
+        let num_threads = 1;
         if ck_proj.len() > num_threads {
           let chunk = (ck_proj.len() as f64 / num_threads as f64).ceil() as usize;
+
+          // .into_iter()
           (0..num_threads)
-            .into_par_iter()
             .flat_map(|i| {
               let start = i * chunk;
               let end = if i == num_threads - 1 {

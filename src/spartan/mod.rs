@@ -22,7 +22,6 @@ use crate::{
 };
 use ff::Field;
 use itertools::Itertools as _;
-use rayon::{iter::IntoParallelRefIterator, prelude::*};
 
 // Creates a vector of the first `n` powers of `s`.
 fn powers<E: Engine>(s: &E::Scalar, n: usize) -> Vec<E::Scalar> {
@@ -52,13 +51,12 @@ impl<E: Engine> PolyEvalWitness<E> {
 
     let size_max = W.iter().map(|w| w.p.len()).max().unwrap();
     // Scale the input polynomials by the power of s
-    let num_chunks = rayon::current_num_threads().next_power_of_two();
+    let num_chunks = 1;
     let chunk_size = size_max / num_chunks;
 
     let p = if chunk_size > 0 {
       (0..num_chunks)
-        .into_par_iter()
-        .flat_map_iter(|chunk_index| {
+        .flat_map(|chunk_index| {
           let mut chunk = vec![E::Scalar::ZERO; chunk_size];
           for (coeff, poly) in powers.iter().zip(W.iter()) {
             for (rlc, poly_eval) in chunk
@@ -76,32 +74,29 @@ impl<E: Engine> PolyEvalWitness<E> {
         })
         .collect::<Vec<_>>()
     } else {
-      W.into_par_iter()
-        .zip_eq(powers.par_iter())
+      W.into_iter()
+        .zip_eq(powers.iter())
         .map(|(mut w, s)| {
           if *s != E::Scalar::ONE {
-            w.p.par_iter_mut().for_each(|e| *e *= s);
+            w.p.iter_mut().for_each(|e| *e *= s);
           }
           w.p
         })
-        .reduce(
-          || vec![E::Scalar::ZERO; size_max],
-          |left, right| {
-            // Sum into the largest polynomial
-            let (mut big, small) = if left.len() > right.len() {
-              (left, right)
-            } else {
-              (right, left)
-            };
+        .fold(vec![E::Scalar::ZERO; size_max], |left, right| {
+          // Sum into the largest polynomial
+          let (mut big, small) = if left.len() > right.len() {
+            (left, right)
+          } else {
+            (right, left)
+          };
 
-            big
-              .par_iter_mut()
-              .zip(small.par_iter())
-              .for_each(|(b, s)| *b += s);
+          big
+            .iter_mut()
+            .zip(small.into_iter())
+            .for_each(|(b, s)| *b += s);
 
-            big
-          },
-        )
+          big
+        })
     };
 
     PolyEvalWitness { p }
@@ -121,13 +116,13 @@ impl<E: Engine> PolyEvalWitness<E> {
 
     let powers_of_s = powers::<E>(s, p_vec.len());
 
-    let num_chunks = rayon::current_num_threads().next_power_of_two();
+    let num_chunks = 1; // No need for multiple chunks
     let chunk_size = p_vec[0].len() / num_chunks;
 
     let p = if chunk_size > 0 {
+      // Sequential version, no parallelism
       (0..num_chunks)
-        .into_par_iter()
-        .flat_map_iter(|chunk_index| {
+        .flat_map(|chunk_index| {
           let mut chunk = vec![E::Scalar::ZERO; chunk_size];
           for (coeff, poly) in powers_of_s.iter().zip(p_vec.iter()) {
             for (rlc, poly_eval) in chunk
@@ -145,17 +140,14 @@ impl<E: Engine> PolyEvalWitness<E> {
         })
         .collect::<Vec<_>>()
     } else {
-      zip_with!(par_iter, (p_vec, powers_of_s), |v, weight| {
+      zip_with!(iter, (p_vec, powers_of_s), |v, weight| {
         // compute the weighted sum for each vector
         v.iter().map(|&x| x * *weight).collect::<Vec<E::Scalar>>()
       })
-      .reduce(
-        || vec![E::Scalar::ZERO; p_vec[0].len()],
-        |acc, v| {
-          // perform vector addition to combine the weighted vectors
-          zip_with!((acc.into_iter(), v), |x, y| x + y).collect()
-        },
-      )
+      .fold(vec![E::Scalar::ZERO; p_vec[0].len()], |acc, v| {
+        // perform vector addition to combine the weighted vectors
+        zip_with!((acc.into_iter(), v), |x, y| x + y).collect()
+      })
     };
 
     PolyEvalWitness { p }
@@ -225,10 +217,10 @@ impl<E: Engine> PolyEvalInstance<E> {
 
     let powers_of_s = powers::<E>(s, num_instances);
     // Weighted sum of evaluations
-    let e = zip_with!(par_iter, (e_vec, powers_of_s), |e, p| *e * p).sum();
+    let e = zip_with!(iter, (e_vec, powers_of_s), |e, p| *e * p).sum();
     // Weighted sum of commitments
-    let c = zip_with!(par_iter, (c_vec, powers_of_s), |c, p| *c * *p)
-      .reduce(Commitment::<E>::default, |acc, item| acc + item);
+    let c = zip_with!(iter, (c_vec, powers_of_s), |c, p| *c * *p)
+      .fold(Commitment::<E>::default(), |acc, item| acc + item);
 
     PolyEvalInstance {
       c,
@@ -253,27 +245,17 @@ fn compute_eval_table_sparse<E: Engine>(
     }
   };
 
-  let (A_evals, (B_evals, C_evals)) = rayon::join(
-    || {
-      let mut A_evals: Vec<E::Scalar> = vec![E::Scalar::ZERO; 2 * S.num_vars];
-      inner(&S.A, &mut A_evals);
-      A_evals
-    },
-    || {
-      rayon::join(
-        || {
-          let mut B_evals: Vec<E::Scalar> = vec![E::Scalar::ZERO; 2 * S.num_vars];
-          inner(&S.B, &mut B_evals);
-          B_evals
-        },
-        || {
-          let mut C_evals: Vec<E::Scalar> = vec![E::Scalar::ZERO; 2 * S.num_vars];
-          inner(&S.C, &mut C_evals);
-          C_evals
-        },
-      )
-    },
-  );
+  // Sequential execution instead of rayon::join
+  let mut A_evals: Vec<E::Scalar> = vec![E::Scalar::ZERO; 2 * S.num_vars];
+  inner(&S.A, &mut A_evals);
+
+  let mut B_evals: Vec<E::Scalar> = vec![E::Scalar::ZERO; 2 * S.num_vars];
+  inner(&S.B, &mut B_evals);
+
+  let mut C_evals: Vec<E::Scalar> = vec![E::Scalar::ZERO; 2 * S.num_vars];
+  inner(&S.C, &mut C_evals);
+
+  // The final result
 
   (A_evals, B_evals, C_evals)
 }

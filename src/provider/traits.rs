@@ -139,18 +139,19 @@ macro_rules! impl_traits {
           uniform_bytes_vec.push(uniform_bytes);
         }
         let gens_proj: Vec<$name_curve> = (0..n)
-          .into_par_iter()
+          .into_iter()
           .map(|i| {
             let hash = $name_curve::hash_to_curve("from_uniform_bytes");
             hash(&uniform_bytes_vec[i])
           })
           .collect();
 
-        let num_threads = rayon::current_num_threads();
+        let num_threads = 1;
         if gens_proj.len() > num_threads {
           let chunk = (gens_proj.len() as f64 / num_threads as f64).ceil() as usize;
+
+          // .into_iter()
           (0..num_threads)
-            .into_par_iter()
             .flat_map(|i| {
               let start = i * chunk;
               let end = if i == num_threads - 1 {

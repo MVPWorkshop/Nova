@@ -14,7 +14,7 @@ use core::{
   ops::{Add, Mul, MulAssign},
 };
 use ff::Field;
-use rayon::prelude::*;
+// use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
 /// A type that holds commitment generators
@@ -280,7 +280,7 @@ where
     let (L, R) = self.split_at(self.ck.len() / 2);
 
     let ck = (0..self.ck.len() / 2)
-      .into_par_iter()
+      .into_iter()
       .map(|i| {
         let bases = [L.ck[i].clone(), R.ck[i].clone()].to_vec();
         E::GE::vartime_multiscalar_mul(&w, &bases).affine()
@@ -298,7 +298,7 @@ where
     let ck_scaled = self
       .ck
       .clone()
-      .into_par_iter()
+      .into_iter()
       .map(|g| E::GE::vartime_multiscalar_mul(&[*r], &[g]).affine())
       .collect();
 
@@ -311,7 +311,7 @@ where
   /// reinterprets a vector of commitments as a set of generators
   fn reinterpret_commitments_as_ck(c: &[Commitment<E>]) -> Result<Self, NovaError> {
     let ck = (0..c.len())
-      .into_par_iter()
+      .into_iter()
       .map(|i| c[i].comm.affine())
       .collect();
 

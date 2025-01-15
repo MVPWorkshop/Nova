@@ -5,7 +5,7 @@
 //! to compute the `A z`, `B z`, and `C z` in Nova.
 use crate::prelude::*;
 use ff::PrimeField;
-use rayon::prelude::*;
+// use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
 /// CSR format sparse matrix, We follow the names used by scipy.
@@ -87,7 +87,7 @@ impl<F: PrimeField> SparseMatrix<F> {
   pub fn multiply_vec_unchecked(&self, vector: &[F]) -> Vec<F> {
     self
       .indptr
-      .par_windows(2)
+      .windows(2)
       .map(|ptrs| {
         self
           .get_row_unchecked(ptrs.try_into().unwrap())

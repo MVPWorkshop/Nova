@@ -6,7 +6,7 @@ use crate::{
   traits::{Group, TranscriptReprTrait},
 };
 use ff::PrimeField;
-use rayon::prelude::{IntoParallelIterator, ParallelIterator};
+// use rayon::prelude::{IntoParallelIterator, ParallelIterator};
 use serde::{Deserialize, Serialize};
 
 // ax^2 + bx + c stored as vec![c, b, a]
@@ -65,7 +65,7 @@ impl<Scalar: PrimeField> UniPoly<Scalar> {
 
   pub fn eval_at_one(&self) -> Scalar {
     (0..self.coeffs.len())
-      .into_par_iter()
+      .into_iter()
       .map(|i| self.coeffs[i])
       .sum()
   }

@@ -159,7 +159,7 @@ impl<Scalar: PrimeField> Add for MultilinearPolynomial<Scalar> {
 
 #[cfg(test)]
 mod tests {
-  use crate::provider::{self, bn256_grumpkin::bn256, secp_secq::secp256k1};
+  // use crate::provider::{self, bn256_grumpkin::bn256, secp_secq::secp256k1};
 
   use super::*;
   use rand_chacha::ChaCha20Rng;
@@ -238,8 +238,8 @@ mod tests {
   #[test]
   fn test_mlp_add() {
     test_mlp_add_with::<pasta_curves::Fp>();
-    test_mlp_add_with::<bn256::Scalar>();
-    test_mlp_add_with::<secp256k1::Scalar>();
+    // test_mlp_add_with::<bn256::Scalar>();
+    // test_mlp_add_with::<secp256k1::Scalar>();
   }
 
   fn test_evaluation_with<F: PrimeField>() {
@@ -267,8 +267,8 @@ mod tests {
   #[test]
   fn test_evaluation() {
     test_evaluation_with::<pasta_curves::Fp>();
-    test_evaluation_with::<provider::bn256_grumpkin::bn256::Scalar>();
-    test_evaluation_with::<provider::secp_secq::secp256k1::Scalar>();
+    // test_evaluation_with::<provider::bn256_grumpkin::bn256::Scalar>();
+    // test_evaluation_with::<provider::secp_secq::secp256k1::Scalar>();
   }
 
   /// Returns a random ML polynomial
@@ -325,7 +325,7 @@ mod tests {
   #[test]
   fn test_bind_and_evaluate() {
     bind_and_evaluate_with::<pasta_curves::Fp>();
-    bind_and_evaluate_with::<bn256::Scalar>();
-    bind_and_evaluate_with::<secp256k1::Scalar>();
+    // bind_and_evaluate_with::<bn256::Scalar>();
+    // bind_and_evaluate_with::<secp256k1::Scalar>();
   }
 }

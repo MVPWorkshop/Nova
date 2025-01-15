@@ -12,8 +12,11 @@ use core::{
   convert::From,
 };
 use ff::PrimeField;
+use libm::{ceil, log2};
 use num_bigint::BigInt;
 use num_traits::cast::ToPrimitive;
+
+use num_traits::float::FloatCore;
 
 /// Compute the natural number represented by an array of limbs.
 /// The limbs are assumed to be based the `limb_width` power of 2.
@@ -375,9 +378,11 @@ impl<Scalar: PrimeField> BigNat<Scalar> {
     let target_base = BigInt::from(1u8) << self.params.limb_width as u32;
     let mut accumulated_extra = BigInt::from(0usize);
     let max_word = max(&self.params.max_word, &other.params.max_word);
-    let carry_bits = (((max_word.to_f64().unwrap() * 2.0).log2() - self.params.limb_width as f64)
-      .ceil()
-      + 0.1) as usize;
+    // let carry_bits = (((max_word.to_f64().unwrap() * 2.0).log2() - self.params.limb_width as f64)
+    //   .ceil()
+    //   + 0.1) as usize;
+    let carry_bits =
+      (ceil(log2(max_word.to_f64().unwrap() * 2.0) - self.params.limb_width as f64) + 0.1) as usize;
     let mut carry_in = Num::new(Some(Scalar::ZERO), LinearCombination::zero());
 
     for i in 0..n {
@@ -454,9 +459,11 @@ impl<Scalar: PrimeField> BigNat<Scalar> {
   ) -> Result<(), SynthesisError> {
     self.enforce_limb_width_agreement(other, "equal_when_carried_regroup")?;
     let max_word = max(&self.params.max_word, &other.params.max_word);
-    let carry_bits = (((max_word.to_f64().unwrap() * 2.0).log2() - self.params.limb_width as f64)
-      .ceil()
-      + 0.1) as usize;
+    // let carry_bits = (((max_word.to_f64().unwrap() * 2.0).log2() - self.params.limb_width as f64)
+    //   .ceil()
+    //   + 0.1) as usize;
+    let carry_bits =
+      (ceil(log2(max_word.to_f64().unwrap() * 2.0) - self.params.limb_width as f64) + 0.1) as usize;
     let limbs_per_group = (Scalar::CAPACITY as usize - carry_bits) / self.params.limb_width;
     let self_grouped = self.group_limbs(limbs_per_group);
     let other_grouped = other.group_limbs(limbs_per_group);

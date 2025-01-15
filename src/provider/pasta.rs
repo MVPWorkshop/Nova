@@ -6,7 +6,9 @@ use crate::{
 };
 use digest::{ExtendableOutput, Update, XofReader};
 use ff::{FromUniformBytes, PrimeField};
-use halo2curves::msm::best_multiexp;
+// TODO -> Remove this
+// use ark_ec::VariableBaseMSM;
+// use halo2curves::msm::best_multiexp;
 use num_bigint::BigInt;
 use num_traits::Num;
 use pasta_curves::{
@@ -17,6 +19,8 @@ use pasta_curves::{
 };
 // use rayon::prelude::*;
 use sha3::Shake256;
+
+use num_traits::float::FloatCore;
 
 macro_rules! impl_traits {
   (
@@ -47,7 +51,18 @@ macro_rules! impl_traits {
         scalars: &[Self::Scalar],
         bases: &[Self::AffineGroupElement],
       ) -> Self {
-        best_multiexp(scalars, bases)
+        // unimplemented!()
+        // ark_ec::VariableBaseMSM::msm(scalars, bases).unwrap()
+        // best_multiexp(scalars, bases)
+
+        // ! If pallas do Ep, if vesta do Eq
+        let mut result = $name::Point::identity();
+        for (scalar, base) in scalars.iter().zip(bases.iter()) {
+          let mut tmp: $name::Point = base.clone().into();
+          tmp = tmp * scalar;
+          result = result + tmp;
+        }
+        result
       }
 
       fn affine(&self) -> Self::AffineGroupElement {

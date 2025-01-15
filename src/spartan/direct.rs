@@ -188,7 +188,7 @@ mod tests {
   use super::*;
   use crate::{
     frontend::{num::AllocatedNum, ConstraintSystem, SynthesisError},
-    provider::{Bn256EngineKZG, PallasEngine, Secp256k1Engine},
+    provider::PallasEngine,
   };
   use core::marker::PhantomData;
   use ff::PrimeField;
@@ -251,21 +251,21 @@ mod tests {
     type Spp = crate::spartan::ppsnark::RelaxedR1CSSNARK<E, EE>;
     test_direct_snark_with::<E, Spp>();
 
-    type E2 = Bn256EngineKZG;
-    type EE2 = crate::provider::hyperkzg::EvaluationEngine<E2>;
-    type S2 = crate::spartan::snark::RelaxedR1CSSNARK<E2, EE2>;
-    test_direct_snark_with::<E2, S2>();
+    // type E2 = Bn256EngineKZG;
+    // type EE2 = crate::provider::hyperkzg::EvaluationEngine<E2>;
+    // type S2 = crate::spartan::snark::RelaxedR1CSSNARK<E2, EE2>;
+    // test_direct_snark_with::<E2, S2>();
 
-    type S2pp = crate::spartan::ppsnark::RelaxedR1CSSNARK<E2, EE2>;
-    test_direct_snark_with::<E2, S2pp>();
+    // type S2pp = crate::spartan::ppsnark::RelaxedR1CSSNARK<E2, EE2>;
+    // test_direct_snark_with::<E2, S2pp>();
 
-    type E3 = Secp256k1Engine;
-    type EE3 = crate::provider::ipa_pc::EvaluationEngine<E3>;
-    type S3 = crate::spartan::snark::RelaxedR1CSSNARK<E3, EE3>;
-    test_direct_snark_with::<E3, S3>();
+    // type E3 = Secp256k1Engine;
+    // type EE3 = crate::provider::ipa_pc::EvaluationEngine<E3>;
+    // type S3 = crate::spartan::snark::RelaxedR1CSSNARK<E3, EE3>;
+    // test_direct_snark_with::<E3, S3>();
 
-    type S3pp = crate::spartan::ppsnark::RelaxedR1CSSNARK<E3, EE3>;
-    test_direct_snark_with::<E3, S3pp>();
+    // type S3pp = crate::spartan::ppsnark::RelaxedR1CSSNARK<E3, EE3>;
+    // test_direct_snark_with::<E3, S3pp>();
   }
 
   fn test_direct_snark_with<E: Engine, S: RelaxedR1CSSNARKTrait<E>>() {

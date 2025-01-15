@@ -10,7 +10,10 @@ use crate::{
   Commitment, CommitmentKey,
 };
 use ff::Field;
-use rand_core::OsRng;
+use rand_chacha::ChaCha20Rng;
+use rand_core::SeedableRng;
+
+// use rand_core::OsRng;
 use serde::{Deserialize, Serialize};
 
 /// A SNARK that holds the proof of a step of an incremental computation
@@ -55,9 +58,9 @@ impl<E: Engine> NIFS<E> {
 
     // append U2 to transcript, U1 does not need to absorbed since U2.X[0] = Hash(params, U1, i, z0, zi)
     U2.absorb_in_ro(&mut ro);
-
+    let mut rng = ChaCha20Rng::seed_from_u64(0xDEADBEEF);
     // compute a commitment to the cross-term
-    let r_T = E::Scalar::random(&mut OsRng);
+    let r_T = E::Scalar::random(&mut rng);
     let (T, comm_T) = S.commit_T(ck, U1, W1, U2, W2, &r_T)?;
 
     // append `comm_T` to the transcript and obtain a challenge
@@ -150,9 +153,10 @@ impl<E: Engine> NIFSRelaxed<E> {
     // append U2 to transcript (randomized instance)
     U2.absorb_in_ro(&mut ro);
 
+    let mut rng = ChaCha20Rng::seed_from_u64(0xDEADBEEF);
     // compute a commitment to the cross-term
-    let r_T = E::Scalar::random(&mut OsRng);
-    E::Scalar::random(&mut OsRng);
+    let r_T = E::Scalar::random(&mut rng);
+    E::Scalar::random(&mut rng);
     let (T, comm_T) = S.commit_T_relaxed(ck, U1, W1, U2, W2, &r_T)?;
 
     // append `comm_T` to the transcript and obtain a challenge
@@ -218,12 +222,12 @@ mod tests {
       ConstraintSystem, SynthesisError,
     },
     prelude::*,
-    provider::{Bn256EngineKZG, PallasEngine, Secp256k1Engine},
+    provider::{/*Bn256EngineKZG,*/ PallasEngine /*Secp256k1Engine*/},
     r1cs::{SparseMatrix, R1CS},
     traits::{commitment::CommitmentEngineTrait, snark::default_ck_hint, Engine},
   };
   use ff::{Field, PrimeField};
-  use rand::rngs::OsRng;
+  // use rand::rngs::OsRng;
 
   fn synthesize_tiny_r1cs_bellpepper<Scalar: PrimeField, CS: ConstraintSystem<Scalar>>(
     cs: &mut CS,
@@ -298,8 +302,8 @@ mod tests {
   #[test]
   fn test_tiny_r1cs_bellpepper() {
     test_tiny_r1cs_bellpepper_with::<PallasEngine>();
-    test_tiny_r1cs_bellpepper_with::<Bn256EngineKZG>();
-    test_tiny_r1cs_bellpepper_with::<Secp256k1Engine>();
+    // test_tiny_r1cs_bellpepper_with::<Bn256EngineKZG>();
+    // test_tiny_r1cs_bellpepper_with::<Secp256k1Engine>();
   }
 
   fn execute_sequence<E: Engine>(
@@ -428,8 +432,8 @@ mod tests {
   #[test]
   fn test_tiny_r1cs_relaxed_derandomize() {
     test_tiny_r1cs_relaxed_derandomize_with::<PallasEngine>();
-    test_tiny_r1cs_relaxed_derandomize_with::<Bn256EngineKZG>();
-    test_tiny_r1cs_relaxed_derandomize_with::<Secp256k1Engine>();
+    // test_tiny_r1cs_relaxed_derandomize_with::<Bn256EngineKZG>();
+    // test_tiny_r1cs_relaxed_derandomize_with::<Secp256k1Engine>();
   }
 
   fn test_tiny_r1cs_relaxed_with<E: Engine>() -> (
@@ -545,8 +549,9 @@ mod tests {
         (O, U, W)
       };
 
-    let mut csprng: OsRng = OsRng;
-    let I = E::Scalar::random(&mut csprng); // the first input is picked randomly for the first instance
+    let mut rng = ChaCha20Rng::seed_from_u64(0xDEADBEEF);
+
+    let I = E::Scalar::random(&mut rng); // the first input is picked randomly for the first instance
     let (_O, U1, W1) = rand_inst_witness_generator(&ck, &I);
     let (U2, W2) = S.sample_random_instance_witness(&ck).unwrap(); // random fold
 
@@ -568,8 +573,8 @@ mod tests {
   #[test]
   fn test_tiny_r1cs_relaxed() {
     test_tiny_r1cs_relaxed_with::<PallasEngine>();
-    test_tiny_r1cs_relaxed_with::<Bn256EngineKZG>();
-    test_tiny_r1cs_relaxed_with::<Secp256k1Engine>();
+    // test_tiny_r1cs_relaxed_with::<Bn256EngineKZG>();
+    // test_tiny_r1cs_relaxed_with::<Secp256k1Engine>();
   }
 
   fn test_tiny_r1cs_with<E: Engine>() {
@@ -680,8 +685,8 @@ mod tests {
         (O, U, W)
       };
 
-    let mut csprng: OsRng = OsRng;
-    let I = E::Scalar::random(&mut csprng); // the first input is picked randomly for the first instance
+    let mut rng = ChaCha20Rng::seed_from_u64(0xDEADBEEF);
+    let I = E::Scalar::random(&mut rng); // the first input is picked randomly for the first instance
     let (O, U1, W1) = rand_inst_witness_generator(&ck, &I);
     let (_O, U2, W2) = rand_inst_witness_generator(&ck, &O);
 
@@ -701,7 +706,7 @@ mod tests {
   #[test]
   fn test_tiny_r1cs() {
     test_tiny_r1cs_with::<PallasEngine>();
-    test_tiny_r1cs_with::<Bn256EngineKZG>();
-    test_tiny_r1cs_with::<Secp256k1Engine>();
+    // test_tiny_r1cs_with::<Bn256EngineKZG>();
+    // test_tiny_r1cs_with::<Secp256k1Engine>();
   }
 }

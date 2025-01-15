@@ -12,8 +12,8 @@ use sha3::{Digest, Sha3_256};
 pub trait Digestible {
   /// Write the byte representation of Self in a byte buffer
   fn write_bytes(&self) -> Result<Vec<u8>, NovaError>;
-  fn write_bytes_postcard(&self) -> Result<Vec<u8>, NovaError>;
-  fn write_bytes_bincode(&self) -> Result<Vec<u8>, NovaError>;
+  // fn write_bytes_postcard(&self) -> Result<Vec<u8>, NovaError>;
+  // fn write_bytes_bincode(&self) -> Result<Vec<u8>, NovaError>;
 }
 
 /// Marker trait to be implemented for types that implement `Digestible` and `Serialize`.
@@ -21,30 +21,20 @@ pub trait Digestible {
 pub trait SimpleDigestible: Serialize {}
 
 impl<T: SimpleDigestible> Digestible for T {
+  #[cfg(feature = "std")]
   fn write_bytes(&self) -> Result<Vec<u8>, NovaError> {
-    if cfg!(feature = "std") {
-      self.write_bytes_bincode()
-    } else {
-      self.write_bytes_postcard()
-    }
-    // #[cfg(not(feature = "std"))]
-    // self.write_bytes_postcard()
-    // #[cfg(feature = "std")]
-    // self.write_bytes_bincode()
-  }
-
-  fn write_bytes_postcard(&self) -> Result<Vec<u8>, NovaError> {
-    postcard::to_allocvec(self).map_err(|e| NovaError::DigestError {
-      reason: e.to_string(),
-    })
-  }
-
-  fn write_bytes_bincode(&self) -> Result<Vec<u8>, NovaError> {
     let config = DefaultOptions::new()
       .with_little_endian()
       .with_fixint_encoding();
     // Serialize into a Vec<u8> and return it
     config.serialize(self).map_err(|e| NovaError::DigestError {
+      reason: e.to_string(),
+    })
+  }
+
+  #[cfg(not(feature = "std"))]
+  fn write_bytes(&self) -> Result<Vec<u8>, NovaError> {
+    postcard::to_allocvec(self).map_err(|e| NovaError::DigestError {
       reason: e.to_string(),
     })
   }

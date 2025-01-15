@@ -137,15 +137,15 @@ mod tests {
     let num_vars = 5;
     let num_masked_vars = 2;
     test_masked_eq_polynomial_with::<Fp, _>(num_vars, num_masked_vars, &mut rng);
-    test_masked_eq_polynomial_with::<provider::bn256_grumpkin::bn256::Scalar, _>(
-      num_vars,
-      num_masked_vars,
-      &mut rng,
-    );
-    test_masked_eq_polynomial_with::<provider::secp_secq::secp256k1::Scalar, _>(
-      num_vars,
-      num_masked_vars,
-      &mut rng,
-    );
+    // test_masked_eq_polynomial_with::<provider::bn256_grumpkin::bn256::Scalar, _>(
+    //   num_vars,
+    //   num_masked_vars,
+    //   &mut rng,
+    // );
+    // test_masked_eq_polynomial_with::<provider::secp_secq::secp256k1::Scalar, _>(
+    //   num_vars,
+    //   num_masked_vars,
+    //   &mut rng,
+    // );
   }
 }

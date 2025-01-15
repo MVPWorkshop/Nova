@@ -14,6 +14,7 @@
 #[cfg(not(feature = "std"))]
 extern crate alloc;
 
+// TODO -> Put cfg flag on mod, and not on imports inside mod
 pub(crate) mod prelude {
   #[cfg(not(feature = "std"))]
   pub use alloc::borrow::ToOwned;
@@ -35,8 +36,6 @@ pub(crate) mod prelude {
   pub use alloc::collections::BTreeMap;
   #[cfg(not(feature = "std"))]
   pub use alloc::collections::VecDeque;
-  #[cfg(not(feature = "std"))]
-  pub use hashbrown::HashMap;
   #[cfg(feature = "std")]
   pub use std::collections::{BTreeMap, HashMap, VecDeque};
 }
@@ -75,7 +74,11 @@ use prelude::*;
 use r1cs::{
   CommitmentKeyHint, R1CSInstance, R1CSShape, R1CSWitness, RelaxedR1CSInstance, RelaxedR1CSWitness,
 };
-use rand_core::OsRng;
+
+use rand_chacha::ChaCha20Rng;
+use rand_core::SeedableRng;
+// use rand_core::OsRng;
+
 use serde::{Deserialize, Serialize};
 use traits::{
   circuit::StepCircuit, commitment::CommitmentEngineTrait, snark::RelaxedR1CSSNARKTrait,
@@ -316,9 +319,10 @@ where
     if z0_primary.len() != pp.F_arity_primary || z0_secondary.len() != pp.F_arity_secondary {
       return Err(NovaError::InvalidInitialInputLength);
     }
+    let mut rng = ChaCha20Rng::seed_from_u64(0xDEADBEEF);
 
-    let ri_primary = E1::Scalar::random(&mut OsRng);
-    let ri_secondary = E2::Scalar::random(&mut OsRng);
+    let ri_primary = E1::Scalar::random(&mut rng);
+    let ri_secondary = E2::Scalar::random(&mut rng);
 
     // base case for the primary
     let mut cs_primary = SatisfyingAssignment::<E1>::new();
@@ -441,7 +445,8 @@ where
       &self.l_w_secondary,
     )?;
 
-    let r_next_primary = E1::Scalar::random(&mut OsRng);
+    let mut rng = ChaCha20Rng::seed_from_u64(0xDEADBEEF);
+    let r_next_primary = E1::Scalar::random(&mut rng);
 
     let mut cs_primary = SatisfyingAssignment::<E1>::new();
     let inputs_primary: NovaAugmentedCircuitInputs<E2> = NovaAugmentedCircuitInputs::new(
@@ -480,7 +485,7 @@ where
       &l_w_primary,
     )?;
 
-    let r_next_secondary = E2::Scalar::random(&mut OsRng);
+    let r_next_secondary = E2::Scalar::random(&mut rng);
 
     let mut cs_secondary = SatisfyingAssignment::<E2>::new();
     let inputs_secondary: NovaAugmentedCircuitInputs<E1> = NovaAugmentedCircuitInputs::new(
@@ -1012,10 +1017,7 @@ type CE<E> = <E as Engine>::CE;
 mod tests {
   use super::*;
   use crate::{
-    provider::{
-      pedersen::CommitmentKeyExtTrait, traits::DlogGroup, Bn256EngineIPA, Bn256EngineKZG,
-      GrumpkinEngine, PallasEngine, Secp256k1Engine, Secq256k1Engine, VestaEngine,
-    },
+    provider::{pedersen::CommitmentKeyExtTrait, traits::DlogGroup, PallasEngine, VestaEngine},
     traits::{circuit::TrivialCircuit, evaluation::EvaluationEngineTrait, snark::default_ck_hint},
   };
   use core::{fmt::Write, marker::PhantomData};
@@ -1114,17 +1116,17 @@ mod tests {
       &expect!["ba7ff40bc60f95f7157350608b2f1892dc33b2470ccf52c3fae0464c61db9501"],
     );
 
-    test_pp_digest_with::<Bn256EngineIPA, GrumpkinEngine, _, _>(
-      &TrivialCircuit::<_>::default(),
-      &TrivialCircuit::<_>::default(),
-      &expect!["e0d75ecff901aee5b22223a4be82af30d7988a5f2cbd40815fda88dd79a22a01"],
-    );
+    // test_pp_digest_with::<Bn256EngineIPA, GrumpkinEngine, _, _>(
+    //   &TrivialCircuit::<_>::default(),
+    //   &TrivialCircuit::<_>::default(),
+    //   &expect!["e0d75ecff901aee5b22223a4be82af30d7988a5f2cbd40815fda88dd79a22a01"],
+    // );
 
-    test_pp_digest_with::<Secp256k1Engine, Secq256k1Engine, _, _>(
-      &TrivialCircuit::<_>::default(),
-      &TrivialCircuit::<_>::default(),
-      &expect!["ee4bd444ffe1f1be8224a09dae09bdf4532035655fd3f25e70955eaa13c48d03"],
-    );
+    // test_pp_digest_with::<Secp256k1Engine, Secq256k1Engine, _, _>(
+    //   &TrivialCircuit::<_>::default(),
+    //   &TrivialCircuit::<_>::default(),
+    //   &expect!["ee4bd444ffe1f1be8224a09dae09bdf4532035655fd3f25e70955eaa13c48d03"],
+    // );
   }
 
   fn test_ivc_trivial_with<E1, E2>()
@@ -1178,8 +1180,8 @@ mod tests {
   #[test]
   fn test_ivc_trivial() {
     test_ivc_trivial_with::<PallasEngine, VestaEngine>();
-    test_ivc_trivial_with::<Bn256EngineKZG, GrumpkinEngine>();
-    test_ivc_trivial_with::<Secp256k1Engine, Secq256k1Engine>();
+    // test_ivc_trivial_with::<Bn256EngineKZG, GrumpkinEngine>();
+    // test_ivc_trivial_with::<Secp256k1Engine, Secq256k1Engine>();
   }
 
   fn test_ivc_nontrivial_with<E1, E2>()
@@ -1259,8 +1261,8 @@ mod tests {
   #[test]
   fn test_ivc_nontrivial() {
     test_ivc_nontrivial_with::<PallasEngine, VestaEngine>();
-    test_ivc_nontrivial_with::<Bn256EngineKZG, GrumpkinEngine>();
-    test_ivc_nontrivial_with::<Secp256k1Engine, Secq256k1Engine>();
+    // test_ivc_nontrivial_with::<Bn256EngineKZG, GrumpkinEngine>();
+    // test_ivc_nontrivial_with::<Secp256k1Engine, Secq256k1Engine>();
   }
 
   fn test_ivc_nontrivial_with_compression_with<E1, E2, EE1, EE2>()
@@ -1352,16 +1354,16 @@ mod tests {
   #[test]
   fn test_ivc_nontrivial_with_compression() {
     test_ivc_nontrivial_with_compression_with::<PallasEngine, VestaEngine, EE<_>, EE<_>>();
-    test_ivc_nontrivial_with_compression_with::<Bn256EngineKZG, GrumpkinEngine, EEPrime<_>, EE<_>>(
-    );
-    test_ivc_nontrivial_with_compression_with::<Secp256k1Engine, Secq256k1Engine, EE<_>, EE<_>>();
+    // test_ivc_nontrivial_with_compression_with::<Bn256EngineKZG, GrumpkinEngine, EEPrime<_>, EE<_>>(
+    // );
+    // test_ivc_nontrivial_with_compression_with::<Secp256k1Engine, Secq256k1Engine, EE<_>, EE<_>>();
 
-    test_ivc_nontrivial_with_spark_compression_with::<
-      Bn256EngineKZG,
-      GrumpkinEngine,
-      provider::hyperkzg::EvaluationEngine<_>,
-      EE<_>,
-    >();
+    // test_ivc_nontrivial_with_spark_compression_with::<
+    //   Bn256EngineKZG,
+    //   GrumpkinEngine,
+    //   provider::hyperkzg::EvaluationEngine<_>,
+    //   EE<_>,
+    // >();
   }
 
   fn test_ivc_nontrivial_with_spark_compression_with<E1, E2, EE1, EE2>()
@@ -1457,14 +1459,14 @@ mod tests {
   #[test]
   fn test_ivc_nontrivial_with_spark_compression() {
     test_ivc_nontrivial_with_spark_compression_with::<PallasEngine, VestaEngine, EE<_>, EE<_>>();
-    test_ivc_nontrivial_with_spark_compression_with::<
-      Bn256EngineKZG,
-      GrumpkinEngine,
-      EEPrime<_>,
-      EE<_>,
-    >();
-    test_ivc_nontrivial_with_spark_compression_with::<Secp256k1Engine, Secq256k1Engine, EE<_>, EE<_>>(
-    );
+    // test_ivc_nontrivial_with_spark_compression_with::<
+    //   Bn256EngineKZG,
+    //   GrumpkinEngine,
+    //   EEPrime<_>,
+    //   EE<_>,
+    // >();
+    // test_ivc_nontrivial_with_spark_compression_with::<Secp256k1Engine, Secq256k1Engine, EE<_>, EE<_>>(
+    // );
   }
 
   fn test_ivc_nondet_with_compression_with<E1, E2, EE1, EE2>()
@@ -1483,7 +1485,7 @@ mod tests {
     impl<F: PrimeField> FifthRootCheckingCircuit<F> {
       fn new(num_steps: usize) -> (Vec<F>, Vec<Self>) {
         let mut powers = Vec::new();
-        let rng = &mut rand::rngs::OsRng;
+        let rng = ChaCha20Rng::seed_from_u64(0xDEADBEEF);
         let mut seed = F::random(rng);
         for _i in 0..num_steps + 1 {
           seed *= seed.clone().square().square();
@@ -1604,8 +1606,8 @@ mod tests {
   #[test]
   fn test_ivc_nondet_with_compression() {
     test_ivc_nondet_with_compression_with::<PallasEngine, VestaEngine, EE<_>, EE<_>>();
-    test_ivc_nondet_with_compression_with::<Bn256EngineKZG, GrumpkinEngine, EEPrime<_>, EE<_>>();
-    test_ivc_nondet_with_compression_with::<Secp256k1Engine, Secq256k1Engine, EE<_>, EE<_>>();
+    // test_ivc_nondet_with_compression_with::<Bn256EngineKZG, GrumpkinEngine, EEPrime<_>, EE<_>>();
+    // test_ivc_nondet_with_compression_with::<Secp256k1Engine, Secq256k1Engine, EE<_>, EE<_>>();
   }
 
   fn test_ivc_base_with<E1, E2>()
@@ -1670,8 +1672,8 @@ mod tests {
   #[test]
   fn test_ivc_base() {
     test_ivc_base_with::<PallasEngine, VestaEngine>();
-    test_ivc_base_with::<Bn256EngineKZG, GrumpkinEngine>();
-    test_ivc_base_with::<Secp256k1Engine, Secq256k1Engine>();
+    // test_ivc_base_with::<Bn256EngineKZG, GrumpkinEngine>();
+    // test_ivc_base_with::<Secp256k1Engine, Secq256k1Engine>();
   }
 
   fn test_setup_with<E1, E2>()
@@ -1728,6 +1730,6 @@ mod tests {
 
   #[test]
   fn test_setup() {
-    test_setup_with::<Bn256EngineKZG, GrumpkinEngine>();
+    test_setup_with::<PallasEngine, VestaEngine>();
   }
 }

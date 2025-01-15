@@ -659,7 +659,7 @@ mod tests {
     provider::{keccak::Keccak256Transcript, PallasEngine},
     spartan::polys::multilinear::MultilinearPolynomial,
   };
-  use bincode::Options;
+
   use rand::SeedableRng;
 
   type E = PallasEngine;

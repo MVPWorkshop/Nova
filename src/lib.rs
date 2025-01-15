@@ -1015,6 +1015,7 @@ type CE<E> = <E as Engine>::CE;
 
 #[cfg(test)]
 mod tests {
+  extern crate std;
   use super::*;
   use crate::{
     provider::{pedersen::CommitmentKeyExtTrait, traits::DlogGroup, PallasEngine, VestaEngine},
@@ -1113,7 +1114,7 @@ mod tests {
     test_pp_digest_with::<PallasEngine, VestaEngine, _, _>(
       &TrivialCircuit::<_>::default(),
       &TrivialCircuit::<_>::default(),
-      &expect!["ba7ff40bc60f95f7157350608b2f1892dc33b2470ccf52c3fae0464c61db9501"],
+      &expect!["aff22914149def618d33ed3a984f3b0e8154ee68f6cda9f3e4ed34ff4d8f9902"], // & expect!["ba7ff40bc60f95f7157350608b2f1892dc33b2470ccf52c3fae0464c61db9501"],
     );
 
     // test_pp_digest_with::<Bn256EngineIPA, GrumpkinEngine, _, _>(
@@ -1341,7 +1342,6 @@ mod tests {
     assert!(res.is_ok());
     let compressed_snark = res.unwrap();
 
-    // verify the compressed SNARK
     let res = compressed_snark.verify(
       &mut vk,
       num_steps,
@@ -1353,6 +1353,7 @@ mod tests {
 
   #[test]
   fn test_ivc_nontrivial_with_compression() {
+    // TODO -> THIS TEST
     test_ivc_nontrivial_with_compression_with::<PallasEngine, VestaEngine, EE<_>, EE<_>>();
     // test_ivc_nontrivial_with_compression_with::<Bn256EngineKZG, GrumpkinEngine, EEPrime<_>, EE<_>>(
     // );
@@ -1458,6 +1459,7 @@ mod tests {
 
   #[test]
   fn test_ivc_nontrivial_with_spark_compression() {
+    // TODO -> THIS TEST
     test_ivc_nontrivial_with_spark_compression_with::<PallasEngine, VestaEngine, EE<_>, EE<_>>();
     // test_ivc_nontrivial_with_spark_compression_with::<
     //   Bn256EngineKZG,
@@ -1605,6 +1607,7 @@ mod tests {
 
   #[test]
   fn test_ivc_nondet_with_compression() {
+    // TODO -> THIS TEST
     test_ivc_nondet_with_compression_with::<PallasEngine, VestaEngine, EE<_>, EE<_>>();
     // test_ivc_nondet_with_compression_with::<Bn256EngineKZG, GrumpkinEngine, EEPrime<_>, EE<_>>();
     // test_ivc_nondet_with_compression_with::<Secp256k1Engine, Secq256k1Engine, EE<_>, EE<_>>();

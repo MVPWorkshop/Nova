@@ -1116,7 +1116,7 @@ mod tests {
     test_pp_digest_with::<PallasEngine, VestaEngine, _, _>(
       &TrivialCircuit::<_>::default(),
       &TrivialCircuit::<_>::default(),
-      &expect!["ba7ff40bc60f95f7157350608b2f1892dc33b2470ccf52c3fae0464c61db9501"],
+      &expect!["aff22914149def618d33ed3a984f3b0e8154ee68f6cda9f3e4ed34ff4d8f9902"], // & expect!["ba7ff40bc60f95f7157350608b2f1892dc33b2470ccf52c3fae0464c61db9501"],
     );
 
     // test_pp_digest_with::<Bn256EngineIPA, GrumpkinEngine, _, _>(

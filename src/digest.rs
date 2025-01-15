@@ -12,8 +12,6 @@ use sha3::{Digest, Sha3_256};
 pub trait Digestible {
   /// Write the byte representation of Self in a byte buffer
   fn write_bytes(&self) -> Result<Vec<u8>, NovaError>;
-  // fn write_bytes_postcard(&self) -> Result<Vec<u8>, NovaError>;
-  // fn write_bytes_bincode(&self) -> Result<Vec<u8>, NovaError>;
 }
 
 /// Marker trait to be implemented for types that implement `Digestible` and `Serialize`.
@@ -21,18 +19,6 @@ pub trait Digestible {
 pub trait SimpleDigestible: Serialize {}
 
 impl<T: SimpleDigestible> Digestible for T {
-  // #[cfg(feature = "std")]
-  // fn write_bytes(&self) -> Result<Vec<u8>, NovaError> {
-  //   let config = DefaultOptions::new()
-  //     .with_little_endian()
-  //     .with_fixint_encoding();
-  //   // Serialize into a Vec<u8> and return it
-  //   config.serialize(self).map_err(|e| NovaError::DigestError {
-  //     reason: e.to_string(),
-  //   })
-  // }
-
-  // #[cfg(not(feature = "std"))]
   fn write_bytes(&self) -> Result<Vec<u8>, NovaError> {
     postcard::to_allocvec(self).map_err(|e| NovaError::DigestError {
       reason: e.to_string(),
@@ -147,8 +133,8 @@ mod tests {
     assert_ne!(good_s.digest(), bad_s.digest());
 
     // ! Should be fine to leave it like this ??
-    let naughty_bytes = bincode::serialize(&bad_s).unwrap();
-    let mut retrieved_s: S<E> = bincode::deserialize(&naughty_bytes).unwrap();
+    let naughty_bytes = postcard::to_allocvec(&bad_s).unwrap();
+    let mut retrieved_s: S<E> = postcard::from_bytes(&naughty_bytes).unwrap();
     assert_eq!(good_s.digest(), retrieved_s.digest())
   }
 }

@@ -16,8 +16,6 @@ use libm::{ceil, log2};
 use num_bigint::BigInt;
 use num_traits::cast::ToPrimitive;
 
-use num_traits::float::FloatCore;
-
 /// Compute the natural number represented by an array of limbs.
 /// The limbs are assumed to be based the `limb_width` power of 2.
 pub fn limbs_to_nat<Scalar: PrimeField, B: Borrow<Scalar>, I: DoubleEndedIterator<Item = B>>(

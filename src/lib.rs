@@ -1015,7 +1015,6 @@ type CE<E> = <E as Engine>::CE;
 
 #[cfg(test)]
 mod tests {
-  extern crate std;
   use super::*;
   use crate::{
     provider::{pedersen::CommitmentKeyExtTrait, traits::DlogGroup, PallasEngine, VestaEngine},

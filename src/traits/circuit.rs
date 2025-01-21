@@ -42,3 +42,25 @@ impl<F: PrimeField> StepCircuit<F> for TrivialCircuit<F> {
     Ok(z.to_vec())
   }
 }
+
+/// A trivial step circuit that simply returns the input
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub struct GenericCircuit<F: PrimeField> {
+  _p: PhantomData<F>,
+  arity_value: usize,
+  synthesize_value: Vec<AllocatedNum<F>>,
+}
+
+impl<F: PrimeField> StepCircuit<F> for GenericCircuit<F> {
+  fn arity(&self) -> usize {
+    self.arity_value
+  }
+
+  fn synthesize<CS: ConstraintSystem<F>>(
+    &self,
+    _cs: &mut CS,
+    _z: &[AllocatedNum<F>],
+  ) -> Result<Vec<AllocatedNum<F>>, SynthesisError> {
+    Ok(self.synthesize_value.clone())
+  }
+}

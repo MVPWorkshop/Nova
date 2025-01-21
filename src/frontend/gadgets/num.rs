@@ -11,7 +11,7 @@ use ff::{PrimeField, PrimeFieldBits};
 use serde::{Deserialize, Serialize};
 
 /// Represents an allocated number in the circuit.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct AllocatedNum<Scalar: PrimeField> {
   value: Option<Scalar>,
   variable: Variable,

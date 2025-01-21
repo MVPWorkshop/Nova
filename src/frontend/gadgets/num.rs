@@ -13,8 +13,10 @@ use serde::{Deserialize, Serialize};
 /// Represents an allocated number in the circuit.
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct AllocatedNum<Scalar: PrimeField> {
-  value: Option<Scalar>,
-  variable: Variable,
+  /// TODO
+  pub value: Option<Scalar>,
+  /// TODO
+  pub variable: Variable,
 }
 
 impl<Scalar: PrimeField> Clone for AllocatedNum<Scalar> {
@@ -27,15 +29,6 @@ impl<Scalar: PrimeField> Clone for AllocatedNum<Scalar> {
 }
 
 impl<Scalar: PrimeField> AllocatedNum<Scalar> {
-  /// Constructor for AllocatedNum
-  pub fn new<CS, F>(value: Option<Scalar>, variable: Variable) -> Self
-  where
-    CS: ConstraintSystem<Scalar>,
-    F: FnOnce() -> Result<Scalar, SynthesisError>,
-  {
-    AllocatedNum { value, variable }
-  }
-
   /// Allocate a `Variable(Aux)` in a `ConstraintSystem`.
   pub fn alloc<CS, F>(mut cs: CS, value: F) -> Result<Self, SynthesisError>
   where

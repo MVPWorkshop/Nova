@@ -54,17 +54,6 @@ pub struct GenericCircuit<F: PrimeField> {
   pub synthesize_value: Vec<AllocatedNum<F>>,
 }
 
-impl<F: PrimeField> GenericCircuit<F> {
-  /// Create a new generic circuit
-  pub fn new(arity_value: usize, synthesize_value: Vec<AllocatedNum<F>>) -> Self {
-    Self {
-      _p: PhantomData::<F>,
-      arity_value,
-      synthesize_value,
-    }
-  }
-}
-
 impl<F: PrimeField> StepCircuit<F> for GenericCircuit<F> {
   fn arity(&self) -> usize {
     self.arity_value

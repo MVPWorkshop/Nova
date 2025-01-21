@@ -28,7 +28,11 @@ impl<Scalar: PrimeField> Clone for AllocatedNum<Scalar> {
 
 impl<Scalar: PrimeField> AllocatedNum<Scalar> {
   /// Constructor for AllocatedNum
-  pub fn new(value: Option<Scalar>, variable: Variable) -> Self {
+  pub fn new<CS, F>(value: Option<Scalar>, variable: Variable) -> Self
+  where
+    CS: ConstraintSystem<Scalar>,
+    F: FnOnce() -> Result<Scalar, SynthesisError>,
+  {
     AllocatedNum { value, variable }
   }
 

@@ -46,9 +46,12 @@ impl<F: PrimeField> StepCircuit<F> for TrivialCircuit<F> {
 /// A generic circuit that can be used for any circuit
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct GenericCircuit<F: PrimeField> {
-  _p: PhantomData<F>,
-  arity_value: usize,
-  synthesize_value: Vec<AllocatedNum<F>>,
+  /// TODO
+  pub _p: PhantomData<F>,
+  /// TODO
+  pub arity_value: usize,
+  /// TODO
+  pub synthesize_value: Vec<AllocatedNum<F>>,
 }
 
 impl<F: PrimeField> GenericCircuit<F> {

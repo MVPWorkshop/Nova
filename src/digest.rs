@@ -3,6 +3,7 @@ use crate::{prelude::*, NovaError, NUM_HASH_BITS};
 // #[cfg(feature = "std")]
 // use bincode::{DefaultOptions, Options};
 
+use bincode::config::legacy;
 use core::marker::PhantomData;
 use ff::PrimeField;
 use serde::Serialize;
@@ -20,7 +21,21 @@ pub trait SimpleDigestible: Serialize {}
 
 impl<T: SimpleDigestible> Digestible for T {
   fn write_bytes(&self) -> Result<Vec<u8>, NovaError> {
-    postcard::to_allocvec(self).map_err(|e| NovaError::DigestError {
+    //  ! Postcard
+    // postcard::to_allocvec(self).map_err(|e| NovaError::DigestError {
+    //   reason: e.to_string(),
+    // })
+    // ! Bincode 1.3
+    // let config = DefaultOptions::new()
+    //   .with_little_endian()
+    //   .with_fixint_encoding();
+    // // Serialize into a Vec<u8> and return it
+    // config.serialize(self).map_err(|e| NovaError::DigestError {
+    //   reason: e.to_string(),
+    // })
+    // ! Bincode 2.0.0-rc.3
+    let config = legacy();
+    bincode::serde::encode_to_vec(self, config).map_err(|e| NovaError::DigestError {
       reason: e.to_string(),
     })
   }

@@ -1341,6 +1341,12 @@ mod tests {
     assert!(res.is_ok());
     let compressed_snark = res.unwrap();
 
+    let json_vk = serde_json::to_string_pretty(&vk).unwrap();
+    std::fs::write("vk.json", json_vk).expect("Failed vk");
+    let json_compressed_snark = serde_json::to_string_pretty(&vk).unwrap();
+    std::fs::write("compressed_snark.json", json_compressed_snark)
+      .expect("Failed compressed_snark");
+
     let res = compressed_snark.verify(
       &mut vk,
       num_steps,

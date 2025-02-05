@@ -36,9 +36,16 @@ thiserror = { version = "2.0", default-features = false }
 group = { version = "0.13.0", default-features = false }
 itertools = { version = "0.13.0", default-features = false }
 hashbrown = { version = "0.15.2" }
-postcard = { version = "1.1.1", default-features = false, features = ["alloc"] }
 # TODO -> FIX VERSION * EVERYWHERE
 libm = { version = "0.2.11", default-features = false }
+
+# postcard = { version = "1.1.1", default-features = false, features = ["alloc"] }
+bincode = { version = "2.0.0-rc.3", features = [
+    "alloc",
+    "derive",
+    "serde",
+], default-features = false }
+
 
 # [target.'cfg(target_arch = "wasm32")'.dependencies]
 # getrandom = { version = "0.2", default-features = false, features = ["js"] }

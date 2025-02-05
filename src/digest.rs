@@ -98,6 +98,7 @@ impl<'a, F: PrimeField, T: Digestible> DigestComputer<'a, F, T> {
 mod tests {
   use super::{DigestComputer, SimpleDigestible};
   use crate::{provider::PallasEngine, traits::Engine};
+  use bincode::config::legacy;
   use ff::Field;
   use serde::{Deserialize, Serialize};
 
@@ -148,8 +149,10 @@ mod tests {
     assert_ne!(good_s.digest(), bad_s.digest());
 
     // ! Should be fine to leave it like this ??
-    let naughty_bytes = postcard::to_allocvec(&bad_s).unwrap();
-    let mut retrieved_s: S<E> = postcard::from_bytes(&naughty_bytes).unwrap();
+    let naughty_bytes = bincode::serde::encode_to_vec(&bad_s, legacy()).unwrap();
+    let mut retrieved_s: S<E> = bincode::serde::decode_from_slice(&naughty_bytes, legacy())
+      .unwrap()
+      .0;
     assert_eq!(good_s.digest(), retrieved_s.digest())
   }
 }

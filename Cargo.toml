@@ -1,5 +1,5 @@
 [package]
-name = "nova-snark"
+name = "no_std_nova_snark"
 version = "0.38.0"
 authors = ["Srinath Setty <srinath@microsoft.com>"]
 edition = "2021"

@@ -681,8 +681,10 @@ where
   ro_consts_primary: ROConstants<E1>,
   ro_consts_secondary: ROConstants<E2>,
   pp_digest: E1::Scalar,
-  vk_primary: S1::VerifierKey,
-  vk_secondary: S2::VerifierKey,
+  /// TODO
+  pub vk_primary: S1::VerifierKey,
+  /// TODO
+  pub vk_secondary: S2::VerifierKey,
   dk_primary: DerandKey<E1>,
   dk_secondary: DerandKey<E2>,
   _p: PhantomData<(C1, C2)>,

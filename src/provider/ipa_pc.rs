@@ -27,7 +27,8 @@ pub struct ProverKey<E: Engine> {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(bound = "")]
 pub struct VerifierKey<E: Engine> {
-  ck_v: CommitmentKey<E>,
+  /// TODO
+  pub ck_v: CommitmentKey<E>,
   ck_s: CommitmentKey<E>,
 }
 

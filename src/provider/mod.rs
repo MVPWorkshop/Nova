@@ -6,6 +6,7 @@ pub mod ipa_pc;
 
 // crate-public modules, made crate-public mostly for tests
 // pub(crate) mod bn256_grumpkin;
+pub(crate) mod msm;
 pub(crate) mod pasta;
 pub(crate) mod pedersen;
 pub mod poseidon;

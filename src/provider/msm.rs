@@ -1,9 +1,9 @@
-
 use crate::prelude::*;
 use core::ops::Neg;
 use ff::{Field, PrimeField};
 use num_traits::float::FloatCore;
 use pasta_curves::{self, arithmetic::CurveAffine, group::Group as AnotherGroup};
+// extern crate std;
 
 const BATCH_SIZE: usize = 64;
 
@@ -422,40 +422,6 @@ pub fn msm_serial<C: CurveAffine>(coeffs: &[C::Scalar], bases: &[C], acc: &mut C
   }
 }
 
-// /// Performs a multi-scalar multiplication operation.
-// ///
-// /// This function will panic if coeffs and bases have a different length.
-// ///
-// /// This will use multithreading if beneficial.
-// pub fn msm_parallel<C: CurveAffine>(coeffs: &[C::Scalar], bases: &[C]) -> C::Curve {
-//   assert_eq!(coeffs.len(), bases.len());
-
-//   let num_threads = rayon::current_num_threads();
-//   if coeffs.len() > num_threads {
-//     let chunk = coeffs.len() / num_threads;
-//     let num_chunks = coeffs.chunks(chunk).len();
-//     let mut results = vec![C::Curve::identity(); num_chunks];
-//     rayon::scope(|scope| {
-//       let chunk = coeffs.len() / num_threads;
-
-//       for ((coeffs, bases), acc) in coeffs
-//         .chunks(chunk)
-//         .zip(bases.chunks(chunk))
-//         .zip(results.iter_mut())
-//       {
-//         scope.spawn(move |_| {
-//           msm_serial(coeffs, bases, acc);
-//         });
-//       }
-//     });
-//     results.iter().fold(C::Curve::identity(), |a, b| a + b)
-//   } else {
-//     let mut acc = C::Curve::identity();
-//     msm_serial(coeffs, bases, &mut acc);
-//     acc
-//   }
-// }
-
 /// This function will panic if coeffs and bases have a different length.
 ///
 /// This will use multithreading if beneficial.
@@ -463,12 +429,19 @@ pub fn msm_best<C: CurveAffine>(coeffs: &[C::Scalar], bases: &[C]) -> C::Curve {
   assert_eq!(coeffs.len(), bases.len());
 
   // TODO: consider adjusting it with empirical data?
-  let c = if bases.len() < 4 {
-    1
-  } else if bases.len() < 32 {
-    3
-  } else {
-    libm::log(f64::from(bases.len() as u32)).ceil() as usize
+  // let c = if bases.len() < 4 {
+  //   1
+  // } else if bases.len() < 32 {
+  //   3
+  // } else {
+  //   libm::log(f64::from(bases.len() as u32)).ceil() as usize
+  // };
+
+  let bases_len = bases.len();
+  let c = match bases_len {
+    1..=3 => 1,
+    4..=31 => 3,
+    _ => (bases.len() - 1).count_ones() as usize,
   };
 
   if c < 10 {

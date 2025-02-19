@@ -894,7 +894,7 @@ where
   /// Verify the correctness of the `CompressedSNARK` (provides zero-knowledge)
   pub fn verify(
     &self,
-    vk: &mut VerifierKey<E1, E2, C1, C2, S1, S2>,
+    vk: &VerifierKey<E1, E2, C1, C2, S1, S2>,
     num_steps: usize,
     z0_primary: &[E1::Scalar],
     z0_secondary: &[E2::Scalar],
@@ -998,10 +998,10 @@ where
     // SNARKs proving the knowledge of their satisfying witnesses
     let res_primary = self
       .snark_primary
-      .verify(&mut vk.vk_primary, &derandom_r_Un_primary);
+      .verify(&vk.vk_primary, &derandom_r_Un_primary);
     let res_secondary = self
       .snark_secondary
-      .verify(&mut vk.vk_secondary, &derandom_r_Un_secondary);
+      .verify(&vk.vk_secondary, &derandom_r_Un_secondary);
 
     res_primary?;
     res_secondary?;
@@ -1334,8 +1334,7 @@ mod tests {
     assert_eq!(zn_secondary, vec![<E2 as Engine>::Scalar::from(2460515u64)]);
 
     // produce the prover and verifier keys for compressed snark
-    let (pk, mut vk) =
-      CompressedSNARK::<_, _, _, _, S<E1, EE1>, S<E2, EE2>>::setup(&mut pp).unwrap();
+    let (pk, vk) = CompressedSNARK::<_, _, _, _, S<E1, EE1>, S<E2, EE2>>::setup(&mut pp).unwrap();
 
     // produce a compressed SNARK
     let res =
@@ -1350,7 +1349,7 @@ mod tests {
       .expect("Failed compressed_snark");
 
     let res = compressed_snark.verify(
-      &mut vk,
+      &vk,
       num_steps,
       &[<E1 as Engine>::Scalar::ONE],
       &[<E2 as Engine>::Scalar::ZERO],
@@ -1442,7 +1441,7 @@ mod tests {
 
     // run the compressed snark with Spark compiler
     // produce the prover and verifier keys for compressed snark
-    let (pk, mut vk) =
+    let (pk, vk) =
       CompressedSNARK::<_, _, _, _, SPrime<E1, EE1>, SPrime<E2, EE2>>::setup(&mut pp).unwrap();
 
     // produce a compressed SNARK
@@ -1456,7 +1455,7 @@ mod tests {
 
     // verify the compressed SNARK
     let res = compressed_snark.verify(
-      &mut vk,
+      &vk,
       num_steps,
       &[<E1 as Engine>::Scalar::ONE],
       &[<E2 as Engine>::Scalar::ZERO],
@@ -1598,8 +1597,7 @@ mod tests {
     assert!(res.is_ok());
 
     // produce the prover and verifier keys for compressed snark
-    let (pk, mut vk) =
-      CompressedSNARK::<_, _, _, _, S<E1, EE1>, S<E2, EE2>>::setup(&mut pp).unwrap();
+    let (pk, vk) = CompressedSNARK::<_, _, _, _, S<E1, EE1>, S<E2, EE2>>::setup(&mut pp).unwrap();
 
     // produce a compressed SNARK
     let res =
@@ -1608,7 +1606,7 @@ mod tests {
     let compressed_snark = res.unwrap();
 
     // verify the compressed SNARK
-    let res = compressed_snark.verify(&mut vk, num_steps, &z0_primary, &z0_secondary);
+    let res = compressed_snark.verify(&vk, num_steps, &z0_primary, &z0_secondary);
     assert!(res.is_ok());
   }
 

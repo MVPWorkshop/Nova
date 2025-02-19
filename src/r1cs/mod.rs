@@ -34,6 +34,7 @@ pub struct R1CS<E: Engine> {
   _p: PhantomData<E>,
 }
 
+use once_cell::sync::OnceCell;
 /// A type that holds the shape of the R1CS matrices
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct R1CSShape<E: Engine> {
@@ -43,8 +44,8 @@ pub struct R1CSShape<E: Engine> {
   pub(crate) A: SparseMatrix<E::Scalar>,
   pub(crate) B: SparseMatrix<E::Scalar>,
   pub(crate) C: SparseMatrix<E::Scalar>,
-  #[serde(skip)]
-  pub(crate) digest: Option<E::Scalar>,
+  #[serde(skip, default = "OnceCell::new")]
+  pub(crate) digest: OnceCell<E::Scalar>,
 }
 
 impl<E: Engine> SimpleDigestible for R1CSShape<E> {}
@@ -142,25 +143,17 @@ impl<E: Engine> R1CSShape<E> {
       A,
       B,
       C,
-      digest: None,
+      digest: OnceCell::new(),
     })
   }
 
   /// returned the digest of the `R1CSShape`
-  pub fn digest(&mut self) -> E::Scalar {
-    if self.digest.is_none() {
-      let computed_digest = DigestComputer::new(self)
-        .digest()
-        .expect("Failure in retrieving digest");
-      self.digest = Some(computed_digest);
-    }
-    self.digest.unwrap()
-
-    // self
-    //   .digest
-    //   .get_or_try_init(|| DigestComputer::new(self).digest())
-    //   .cloned()
-    //   .expect("Failure retrieving digest")
+  pub fn digest(&self) -> E::Scalar {
+    self
+      .digest
+      .get_or_try_init(|| DigestComputer::new(self).digest())
+      .cloned()
+      .expect("Failure retrieving digest")
   }
 
   // Checks regularity conditions on the R1CSShape, required in Spartan-class SNARKs
@@ -354,7 +347,7 @@ impl<E: Engine> R1CSShape<E> {
         A: self.A.clone(),
         B: self.B.clone(),
         C: self.C.clone(),
-        digest: None,
+        digest: OnceCell::new(),
       };
     }
 
@@ -390,7 +383,7 @@ impl<E: Engine> R1CSShape<E> {
       A: A_padded,
       B: B_padded,
       C: C_padded,
-      digest: None,
+      digest: OnceCell::new(),
     }
   }
 

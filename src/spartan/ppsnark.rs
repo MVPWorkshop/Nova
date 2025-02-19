@@ -33,6 +33,7 @@ use crate::{
 };
 use core::cmp::max;
 use ff::Field;
+use once_cell::sync::OnceCell;
 use serde::{Deserialize, Serialize};
 
 fn padded<E: Engine>(v: &[E::Scalar], n: usize, e: &E::Scalar) -> Vec<E::Scalar> {
@@ -833,8 +834,8 @@ pub struct VerifierKey<E: Engine, EE: EvaluationEngineTrait<E>> {
   /// TODO
   pub vk_ee: EE::VerifierKey,
   S_comm: R1CSShapeSparkCommitment<E>,
-  #[serde(skip)]
-  digest: Option<E::Scalar>,
+  #[serde(skip, default = "OnceCell::new")]
+  digest: OnceCell<E::Scalar>,
 }
 
 impl<E: Engine, EE: EvaluationEngineTrait<E>> SimpleDigestible for VerifierKey<E, EE> {}
@@ -1022,23 +1023,23 @@ impl<E: Engine, EE: EvaluationEngineTrait<E>> VerifierKey<E, EE> {
 }
 impl<E: Engine, EE: EvaluationEngineTrait<E>> DigestHelperTrait<E> for VerifierKey<E, EE> {
   /// Returns the digest of the verifier's key
-  fn digest(&mut self) -> E::Scalar {
-    if self.digest.is_none() {
-      let computed_digest = DigestComputer::new(self)
-        .digest()
-        .expect("Failure in retrieving digest");
-      self.digest = Some(computed_digest);
-    }
-    self.digest.unwrap()
+  fn digest(&self) -> E::Scalar {
+    // if self.digest.is_none() {
+    //   let computed_digest = DigestComputer::new(self)
+    //     .digest()
+    //     .expect("Failure in retrieving digest");
+    //   self.digest = Some(computed_digest);
+    // }
+    // self.digest.unwrap()
 
-    // self
-    //   .digest
-    //   .get_or_try_init(|| {
-    //     let dc = DigestComputer::new(self);
-    //     dc.digest()
-    //   })
-    //   .cloned()
-    //   .expect("Failure to retrieve digest!")
+    self
+      .digest
+      .get_or_try_init(|| {
+        let dc = DigestComputer::new(self);
+        dc.digest()
+      })
+      .cloned()
+      .expect("Failure to retrieve digest!")
   }
 }
 
@@ -1069,7 +1070,7 @@ impl<E: Engine, EE: EvaluationEngineTrait<E>> RelaxedR1CSSNARKTrait<E> for Relax
     let S_repr = R1CSShapeSparkRepr::new(&S);
     let S_comm = S_repr.commit(ck);
 
-    let mut vk = VerifierKey::new(S.num_cons, S.num_vars, S_comm.clone(), vk_ee);
+    let vk = VerifierKey::new(S.num_cons, S.num_vars, S_comm.clone(), vk_ee);
 
     let pk = ProverKey {
       pk_ee,
@@ -1387,11 +1388,7 @@ impl<E: Engine, EE: EvaluationEngineTrait<E>> RelaxedR1CSSNARKTrait<E> for Relax
   }
 
   /// verifies a proof of satisfiability of a `RelaxedR1CS` instance
-  fn verify(
-    &self,
-    vk: &mut Self::VerifierKey,
-    U: &RelaxedR1CSInstance<E>,
-  ) -> Result<(), NovaError> {
+  fn verify(&self, vk: &Self::VerifierKey, U: &RelaxedR1CSInstance<E>) -> Result<(), NovaError> {
     let mut transcript = E::TE::new(b"RelaxedR1CSSNARK");
 
     // append the verifier key (including commitment to R1CS matrices) and the RelaxedR1CSInstance to the transcript

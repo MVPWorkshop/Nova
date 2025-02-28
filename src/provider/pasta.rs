@@ -47,7 +47,7 @@ macro_rules! impl_traits {
         scalars: &[Self::Scalar],
         bases: &[Self::AffineGroupElement],
       ) -> Self {
-        msm_best(scalars, bases)
+        pasta_msm::$name(bases, scalars)
       }
 
       fn affine(&self) -> Self::AffineGroupElement {

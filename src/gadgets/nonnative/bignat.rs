@@ -6,6 +6,7 @@ use crate::frontend::{ConstraintSystem, LinearCombination, SynthesisError};
 #[cfg(not(feature = "std"))]
 use crate::prelude::*;
 use ff::PrimeField;
+use libm::log2;
 use num_bigint::BigInt;
 use num_traits::cast::ToPrimitive;
 #[cfg(feature = "std")]
@@ -372,7 +373,7 @@ impl<Scalar: PrimeField> BigNat<Scalar> {
     let target_base = BigInt::from(1u8) << self.params.limb_width as u32;
     let mut accumulated_extra = BigInt::from(0usize);
     let max_word = max(&self.params.max_word, &other.params.max_word);
-    let carry_bits = (((max_word.to_f64().unwrap() * 2.0).log2() - self.params.limb_width as f64)
+    let carry_bits = ((log2(max_word.to_f64().unwrap() * 2.0) - self.params.limb_width as f64)
       .ceil()
       + 0.1) as usize;
     let mut carry_in = Num::new(Some(Scalar::ZERO), LinearCombination::zero());
@@ -451,7 +452,7 @@ impl<Scalar: PrimeField> BigNat<Scalar> {
   ) -> Result<(), SynthesisError> {
     self.enforce_limb_width_agreement(other, "equal_when_carried_regroup")?;
     let max_word = max(&self.params.max_word, &other.params.max_word);
-    let carry_bits = (((max_word.to_f64().unwrap() * 2.0).log2() - self.params.limb_width as f64)
+    let carry_bits = ((log2(max_word.to_f64().unwrap() * 2.0) - self.params.limb_width as f64)
       .ceil()
       + 0.1) as usize;
     let limbs_per_group = (Scalar::CAPACITY as usize - carry_bits) / self.params.limb_width;

@@ -61,6 +61,7 @@ pub(crate) mod prelude {
   pub use core::mem;
   pub use core::ops::{Add, Sub};
   pub use hashbrown::HashMap;
+  pub use num_traits::float::FloatCore;
   // #[cfg(feature = "std")]
   // pub use std::collections::{BTreeMap, HashMap, VecDeque};
 }

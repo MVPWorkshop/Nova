@@ -1003,11 +1003,11 @@ where
     #[cfg(not(feature = "std"))]
     let res_primary = self
       .snark_primary
-      .verify(&mut vk.vk_primary, &derandom_r_Un_primary);
+      .verify(&vk.vk_primary, &derandom_r_Un_primary);
     #[cfg(not(feature = "std"))]
     let res_secondary = self
       .snark_secondary
-      .verify(&mut vk.vk_secondary, &derandom_r_Un_secondary);
+      .verify(&vk.vk_secondary, &derandom_r_Un_secondary);
 
     res_primary?;
     res_secondary?;

@@ -25,7 +25,12 @@ use crate::{
 use core::marker::PhantomData;
 use ff::Field;
 use once_cell::sync::OnceCell;
+#[cfg(not(feature = "std"))]
+use rand_chacha::ChaCha20Rng;
+#[cfg(feature = "std")]
 use rand_core::OsRng;
+#[cfg(not(feature = "std"))]
+use rand_core::SeedableRng;
 use serde::{Deserialize, Serialize};
 
 mod circuit;
@@ -261,8 +266,14 @@ where
       return Err(NovaError::InvalidInitialInputLength);
     }
 
+    #[cfg(feature = "std")]
     let ri_primary = E1::Scalar::random(&mut OsRng);
+    #[cfg(feature = "std")]
     let ri_secondary = E2::Scalar::random(&mut OsRng);
+    #[cfg(not(feature = "std"))]
+    let ri_primary = E1::Scalar::random(&mut ChaCha20Rng::seed_from_u64(0xDEADBEEF));
+    #[cfg(not(feature = "std"))]
+    let ri_secondary = E2::Scalar::random(&mut ChaCha20Rng::seed_from_u64(0xDEADBEEF));
 
     // base case for the primary
     let mut cs_primary = SatisfyingAssignment::<E1>::new();
@@ -384,7 +395,10 @@ where
       &self.l_w_secondary,
     )?;
 
+    #[cfg(feature = "std")]
     let r_next_primary = E1::Scalar::random(&mut OsRng);
+    #[cfg(not(feature = "std"))]
+    let r_next_primary = E1::Scalar::random(&mut ChaCha20Rng::seed_from_u64(0xDEADBEEF));
 
     let mut cs_primary = SatisfyingAssignment::<E1>::new();
     let inputs_primary: NovaAugmentedCircuitInputs<E2> = NovaAugmentedCircuitInputs::new(
@@ -422,6 +436,9 @@ where
       &l_w_primary,
     )?;
 
+    #[cfg(not(feature = "std"))]
+    let r_next_secondary = E2::Scalar::random(&mut ChaCha20Rng::seed_from_u64(0xDEAEDBEEF));
+    #[cfg(feature = "std")]
     let r_next_secondary = E2::Scalar::random(&mut OsRng);
 
     let mut cs_secondary = SatisfyingAssignment::<E2>::new();

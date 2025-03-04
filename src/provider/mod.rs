@@ -10,6 +10,7 @@ pub mod msm_no_std_impl;
 
 #[cfg(feature = "std")]
 pub mod pasta;
+#[cfg(not(feature = "std"))]
 pub mod pasta_curves;
 pub mod poseidon;
 #[cfg(feature = "std")]
@@ -23,16 +24,16 @@ pub(crate) mod traits;
 #[cfg(feature = "std")]
 use crate::provider::{
   bn256_grumpkin::{bn256, grumpkin},
+  hyperkzg::CommitmentEngine as HyperKZGCommitmentEngine,
   pasta::{pallas, vesta},
   secp_secq::{secp256k1, secq256k1},
 };
+#[cfg(not(feature = "std"))]
+use pasta_curves::{pallas_no_std as pallas, vesta_no_std as vesta};
+
 use crate::{
   provider::{
-    // bn256_grumpkin::{bn256, grumpkin},
-    hyperkzg::CommitmentEngine as HyperKZGCommitmentEngine,
     keccak::Keccak256Transcript,
-    // secp_secq::{secp256k1, secq256k1},
-    // pasta::{pallas, vesta},
     pedersen::CommitmentEngine as PedersenCommitmentEngine,
     poseidon::{PoseidonRO, PoseidonROCircuit},
   },

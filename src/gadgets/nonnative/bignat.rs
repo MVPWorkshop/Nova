@@ -329,7 +329,7 @@ impl<Scalar: PrimeField> BigNat<Scalar> {
   pub fn enforce_limb_width_agreement(
     &self,
     other: &Self,
-    location: &str,
+    _location: &str,
   ) -> Result<usize, SynthesisError> {
     if self.params.limb_width == other.params.limb_width {
       Ok(self.params.limb_width)
@@ -337,7 +337,7 @@ impl<Scalar: PrimeField> BigNat<Scalar> {
       #[cfg(feature = "std")]
       eprintln!(
         "Limb widths {}, {}, do not agree at {}",
-        self.params.limb_width, other.params.limb_width, location
+        self.params.limb_width, other.params.limb_width, _location
       );
       Err(SynthesisError::Unsatisfiable)
     }

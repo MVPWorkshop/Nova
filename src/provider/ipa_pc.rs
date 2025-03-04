@@ -113,7 +113,8 @@ fn inner_product<T: Field + Send + Sync>(a: &[T], b: &[T]) -> T {
   let res = (0..a.len())
     .into_iter()
     .map(|i| a[i] * b[i])
-    .reduce(|| T::ZERO, |x, y| x + y);
+    .fold(T::ZERO, |x, y| x + y);
+
   res
 }
 

@@ -327,7 +327,7 @@ impl<E: Engine> PolyEvalInstance<E> {
       .reduce(Commitment::<E>::default, |acc, item| acc + item);
     #[cfg(not(feature = "std"))]
     let c = zip_with!(iter, (c_vec, powers_of_s), |c, p| *c * *p)
-      .reduce(Commitment::<E>::default, |acc, item| acc + item);
+      .fold(Commitment::<E>::default(), |acc, item| acc + item);
 
     PolyEvalInstance {
       c,

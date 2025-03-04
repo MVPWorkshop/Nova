@@ -35,7 +35,6 @@ type DerandKey<E> = <<E as Engine>::CE as CommitmentEngineTrait<E>>::DerandKey;
 type Commitment<E> = <<E as Engine>::CE as CommitmentEngineTrait<E>>::Commitment;
 type CE<E> = <E as Engine>::CE;
 
-// TODO -> See how to handle this in best way possible
 #[cfg(not(feature = "std"))]
 pub(crate) mod prelude {
   extern crate alloc;
@@ -47,8 +46,7 @@ pub(crate) mod prelude {
   pub use alloc::vec;
   pub use alloc::vec::Vec;
 
-  // TODO -> !!!!PROBLEMATIC
-  pub use alloc::convert::From;
+  pub use core::convert::From;
 
   pub use alloc::collections::BTreeMap;
   pub use alloc::collections::VecDeque;
@@ -61,7 +59,6 @@ pub(crate) mod prelude {
   pub use core::mem;
   pub use core::ops::{Add, Sub};
   pub use hashbrown::HashMap;
+  pub use itertools::Itertools;
   pub use num_traits::float::FloatCore;
-  // #[cfg(feature = "std")]
-  // pub use std::collections::{BTreeMap, HashMap, VecDeque};
 }

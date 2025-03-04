@@ -112,7 +112,7 @@ impl<Scalar: PrimeField> MultilinearPolynomial<Scalar> {
     .sum();
     #[cfg(not(feature = "std"))]
     let res = zip_with!(
-      (EqPolynomial::evals_from_points(r).into_iter(), Z.ter()),
+      (EqPolynomial::evals_from_points(r).into_iter(), Z.iter()),
       |a, b| a * b
     )
     .sum();

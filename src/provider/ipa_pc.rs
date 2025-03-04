@@ -1,4 +1,6 @@
 //! This module implements `EvaluationEngine` using an IPA-based polynomial commitment scheme
+#[cfg(not(feature = "std"))]
+use crate::prelude::*;
 use crate::{
   errors::NovaError,
   provider::{pedersen::CommitmentKeyExtTrait, traits::DlogGroup},
@@ -14,6 +16,7 @@ use ff::Field;
 #[cfg(feature = "std")]
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
+#[cfg(feature = "std")]
 use std::marker::PhantomData;
 
 /// Provides an implementation of the prover key

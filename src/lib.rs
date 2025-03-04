@@ -47,8 +47,20 @@ pub(crate) mod prelude {
   pub use alloc::vec;
   pub use alloc::vec::Vec;
 
+  // TODO -> !!!!PROBLEMATIC
+  pub use alloc::convert::From;
+
   pub use alloc::collections::BTreeMap;
   pub use alloc::collections::VecDeque;
+
+  pub use core::borrow::Borrow;
+  pub use core::cmp::{max, min, Ordering};
+  pub use core::fmt;
+  pub use core::iter;
+  pub use core::marker::PhantomData;
+  pub use core::mem;
+  pub use core::ops::{Add, Sub};
+  pub use hashbrown::HashMap;
   // #[cfg(feature = "std")]
   // pub use std::collections::{BTreeMap, HashMap, VecDeque};
 }

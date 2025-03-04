@@ -20,6 +20,7 @@ pub(crate) mod keccak;
 pub(crate) mod pedersen;
 pub(crate) mod traits;
 
+// #[cfg(feature = "std")]
 use crate::{
   provider::{
     bn256_grumpkin::{bn256, grumpkin},

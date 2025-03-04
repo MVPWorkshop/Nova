@@ -3,7 +3,7 @@
 
 use crate::provider::msm_no_std_impl::msm_best;
 use crate::{
-  //   prelude::*,
+  prelude::*,
   provider::traits::DlogGroup,
   traits::{Group, PrimeFieldExt, TranscriptReprTrait},
 };

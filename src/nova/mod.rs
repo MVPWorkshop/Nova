@@ -1,5 +1,6 @@
 //! This module implements Nova's IVC scheme including its folding scheme.
-
+#[cfg(not(feature = "std"))]
+use crate::prelude::*;
 use crate::{
   constants::{BN_LIMB_WIDTH, BN_N_LIMBS, NUM_HASH_BITS},
   digest::{DigestComputer, SimpleDigestible},

@@ -15,6 +15,8 @@ pub(crate) mod math;
 pub(crate) mod polys;
 mod sumcheck;
 
+#[cfg(not(feature = "std"))]
+use crate::prelude::*;
 use crate::{
   r1cs::{R1CSShape, SparseMatrix},
   traits::Engine,

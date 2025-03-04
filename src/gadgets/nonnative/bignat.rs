@@ -3,13 +3,17 @@ use super::{
   OptionExt,
 };
 use crate::frontend::{ConstraintSystem, LinearCombination, SynthesisError};
+#[cfg(not(feature = "std"))]
+use crate::prelude::*;
 use ff::PrimeField;
 use num_bigint::BigInt;
 use num_traits::cast::ToPrimitive;
+#[cfg(feature = "std")]
 use std::{
   borrow::Borrow,
   cmp::{max, min},
   convert::From,
+  iter, mem,
 };
 
 /// Compute the natural number represented by an array of limbs.
@@ -52,6 +56,7 @@ pub fn nat_to_limbs<Scalar: PrimeField>(
         .collect(),
     )
   } else {
+    #[cfg(feature = "std")]
     eprintln!("nat {nat} does not fit in {n_limbs} limbs of width {limb_width}");
     Err(SynthesisError::Unsatisfiable)
   }
@@ -132,6 +137,7 @@ impl<Scalar: PrimeField> BigNat<Scalar> {
           || match values_cell {
             Ok(ref vs) => {
               if vs.len() != n_limbs {
+                #[cfg(feature = "std")]
                 eprintln!("Values do not match stated limb count");
                 return Err(SynthesisError::Unsatisfiable);
               }
@@ -144,10 +150,12 @@ impl<Scalar: PrimeField> BigNat<Scalar> {
               Ok(vs[limb_i])
             }
             // Hack b/c SynthesisError and io::Error don't implement Clone
-            Err(ref e) => Err(SynthesisError::from(std::io::Error::new(
-              std::io::ErrorKind::Other,
-              format!("{e}"),
-            ))),
+            Err(ref _e) => {
+              // print in std feature
+              #[cfg(feature = "std")]
+              eprintln!("{_e}");
+              Err(SynthesisError::AssignmentMissing)
+            }
           },
         )
         .map(|v| LinearCombination::zero() + v)
@@ -196,10 +204,12 @@ impl<Scalar: PrimeField> BigNat<Scalar> {
               Ok(vs[limb_i])
             }
             // Hack b/c SynthesisError and io::Error don't implement Clone
-            Err(ref e) => Err(SynthesisError::from(std::io::Error::new(
-              std::io::ErrorKind::Other,
-              format!("{e}"),
-            ))),
+            Err(ref _e) => {
+              // print in std feature
+              #[cfg(feature = "std")]
+              eprintln!("{_e}");
+              Err(SynthesisError::AssignmentMissing)
+            }
           },
         )
         .map(|v| LinearCombination::zero() + v)
@@ -323,6 +333,7 @@ impl<Scalar: PrimeField> BigNat<Scalar> {
     if self.params.limb_width == other.params.limb_width {
       Ok(self.params.limb_width)
     } else {
+      #[cfg(feature = "std")]
       eprintln!(
         "Limb widths {}, {}, do not agree at {}",
         self.params.limb_width, other.params.limb_width, location
@@ -642,8 +653,7 @@ impl<Scalar: PrimeField> BigNat<Scalar> {
           shift = Scalar::ONE;
         }
         limbs[i / limbs_per_group] =
-          std::mem::replace(&mut limbs[i / limbs_per_group], LinearCombination::zero())
-            + (shift, limb);
+          mem::replace(&mut limbs[i / limbs_per_group], LinearCombination::zero()) + (shift, limb);
         shift.mul_assign(&limb_block);
       }
       limbs
@@ -685,7 +695,7 @@ impl<Scalar: PrimeField> Polynomial<Scalar> {
     let n_product_coeffs = self.coefficients.len() + other.coefficients.len() - 1;
     let values = self.values.as_ref().and_then(|self_vs| {
       other.values.as_ref().map(|other_vs| {
-        let mut values: Vec<Scalar> = std::iter::repeat_with(|| Scalar::ZERO)
+        let mut values: Vec<Scalar> = iter::repeat_with(|| Scalar::ZERO)
           .take(n_product_coeffs)
           .collect();
         for (self_i, self_v) in self_vs.iter().enumerate() {

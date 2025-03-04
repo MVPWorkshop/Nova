@@ -4,6 +4,8 @@
 //! polynomial commitment scheme in which the verifier's costs is succinct.
 //! This code includes experimental optimizations to reduce runtimes and proof sizes.
 //! We have not yet proven the security of these optimizations, so this code is subject to significant changes in the future.
+#[cfg(not(feature = "std"))]
+use crate::prelude::*;
 use crate::{
   digest::{DigestComputer, SimpleDigestible},
   errors::NovaError,

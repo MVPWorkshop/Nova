@@ -16,12 +16,11 @@ pub mod poseidon;
 #[cfg(feature = "std")]
 pub mod secp_secq;
 
-pub(crate) mod ptau;
-pub use ptau::{check_sanity_of_ptau_file, read_ptau, write_ptau};
-
 // crate-private modules
 pub(crate) mod keccak;
+pub(crate) mod msm;
 pub(crate) mod pedersen;
+pub(crate) mod ptau;
 pub(crate) mod traits;
 
 #[cfg(feature = "std")]
@@ -42,6 +41,7 @@ use crate::{
   },
   traits::Engine,
 };
+pub use ptau::{check_sanity_of_ptau_file, read_ptau, write_ptau};
 use serde::{Deserialize, Serialize};
 
 /// An implementation of Nova traits with HyperKZG over the BN256 curve

@@ -34,7 +34,8 @@ pub struct CommitmentKey<E: Engine>
 where
   E::GE: DlogGroup,
 {
-  ck: Vec<<E::GE as DlogGroup>::AffineGroupElement>,
+  /// TODO
+  pub ck: Vec<<E::GE as DlogGroup>::AffineGroupElement>,
   h: Option<<E::GE as DlogGroup>::AffineGroupElement>,
 }
 

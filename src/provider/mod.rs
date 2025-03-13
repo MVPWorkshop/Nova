@@ -18,6 +18,7 @@ pub mod secp_secq;
 
 // crate-private modules
 pub(crate) mod keccak;
+#[cfg(feature = "std")]
 pub(crate) mod msm;
 pub(crate) mod pedersen;
 pub(crate) mod ptau;
@@ -41,6 +42,7 @@ use crate::{
   },
   traits::Engine,
 };
+#[cfg(feature = "std")]
 pub use ptau::{check_sanity_of_ptau_file, read_ptau, write_ptau};
 use serde::{Deserialize, Serialize};
 

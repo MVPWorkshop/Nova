@@ -1,13 +1,15 @@
 //! This module defines a collection of traits that define the behavior of a commitment engine
 //! We require the commitment engine to provide a commitment to vectors with a single group element
-use crate::{
-  provider::ptau::PtauFileError,
-  traits::{AbsorbInRO2Trait, AbsorbInROTrait, Engine, TranscriptReprTrait},
-};
+#[cfg(not(feature = "std"))]
+use crate::prelude::*;
+#[cfg(feature = "std")]
+use crate::provider::ptau::PtauFileError;
+use crate::traits::{AbsorbInRO2Trait, AbsorbInROTrait, Engine, TranscriptReprTrait};
 use core::{
   fmt::Debug,
   ops::{Add, Mul, MulAssign},
 };
+#[cfg(feature = "std")]
 use rayon::iter::{IndexedParallelIterator, IntoParallelRefIterator, ParallelIterator};
 use serde::{Deserialize, Serialize};
 
@@ -59,6 +61,7 @@ pub trait CommitmentEngineTrait<E: Engine>: Clone + Send + Sync {
   type Commitment: CommitmentTrait<E>;
 
   /// Load keys
+  #[cfg(feature = "std")]
   fn load_setup(
     reader: &mut (impl std::io::Read + std::io::Seek),
     n: usize,
@@ -80,10 +83,19 @@ pub trait CommitmentEngineTrait<E: Engine>: Clone + Send + Sync {
     r: &[E::Scalar],
   ) -> Vec<Self::Commitment> {
     assert!(v.len() == r.len());
-    v.par_iter()
+    #[cfg(feature = "std")]
+    let res = v
+      .par_iter()
       .zip(r.par_iter())
       .map(|(v_i, r_i)| Self::commit(ck, v_i, r_i))
-      .collect()
+      .collect();
+    #[cfg(not(feature = "std"))]
+    let res = v
+      .iter()
+      .zip(r.iter())
+      .map(|(v_i, r_i)| Self::commit(ck, v_i, r_i))
+      .collect();
+    res
   }
 
   /// Remove given blind from commitment

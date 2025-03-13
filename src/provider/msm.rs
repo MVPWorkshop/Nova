@@ -1,3 +1,4 @@
+#![cfg(feature = "std")]
 //! This module provides a multi-scalar multiplication routine
 /// Adapted from zcash/halo2
 use ff::PrimeField;

@@ -8,15 +8,12 @@
 #![allow(non_snake_case)]
 #[cfg(not(feature = "std"))]
 use crate::prelude::*;
+#[cfg(feature = "std")]
+use crate::provider::{ptau::PtauFileError, read_ptau, write_ptau};
 use crate::{
   errors::NovaError,
   gadgets::utils::to_bignat_repr,
-  provider::{
-    ptau::PtauFileError,
-    read_ptau,
-    traits::{DlogGroup, PairingGroup},
-    write_ptau,
-  },
+  provider::traits::{DlogGroup, PairingGroup},
   traits::{
     commitment::{CommitmentEngineTrait, CommitmentTrait, Len},
     evaluation::EvaluationEngineTrait,
@@ -24,7 +21,7 @@ use crate::{
   },
 };
 use core::{
-  iter,
+  array, iter,
   marker::PhantomData,
   ops::{Add, Mul, MulAssign},
   slice,
@@ -141,6 +138,7 @@ impl<E: Engine> CommitmentKey<E>
 where
   E::GE: PairingGroup,
 {
+  #[cfg(feature = "std")]
   /// Save keys
   pub fn save_to(
     &self,
@@ -310,7 +308,10 @@ where
     let gen = <E::GE as DlogGroup>::gen();
 
     let ck = fixed_base_exp_comb_batch::<4, 16, 64, 2, 32, _>(gen, powers_of_tau);
+    #[cfg(feature = "std")]
     let ck = ck.par_iter().map(|p| p.affine()).collect();
+    #[cfg(not(feature = "std"))]
+    let ck = ck.iter().map(|p| p.affine()).collect();
 
     let h = *E::GE::from_label(label, 1).first().unwrap();
 
@@ -351,8 +352,13 @@ where
   }
 
   fn compute_powers_par(tau: E::Scalar, n: usize) -> Vec<E::Scalar> {
+    #[cfg(feature = "std")]
     let num_threads = rayon::current_num_threads();
-    (0..n)
+    #[cfg(not(feature = "std"))]
+    let num_threads = 1;
+
+    #[cfg(feature = "std")]
+    let res = (0..n)
       .collect::<Vec<_>>()
       .par_chunks(std::cmp::max(n / num_threads, 1))
       .into_par_iter()
@@ -365,7 +371,24 @@ where
         res
       })
       .flatten()
+      .collect::<Vec<_>>();
+    #[cfg(not(feature = "std"))]
+    let res = (0..n)
       .collect::<Vec<_>>()
+      .chunks(max(n / num_threads, 1))
+      .into_iter()
+      .map(|sub_list| {
+        let mut res = Vec::with_capacity(sub_list.len());
+        res.push(tau.pow([sub_list[0] as u64]));
+        for i in 1..sub_list.len() {
+          res.push(res[i - 1] * tau);
+        }
+        res
+      })
+      .flatten()
+      .collect::<Vec<_>>();
+
+    res
   }
 }
 
@@ -397,8 +420,33 @@ fn fixed_base_exp_comb_batch<
     res
   };
 
+  #[cfg(feature = "std")]
   let mut precompute_res = (1..POW_2_H)
     .into_par_iter()
+    .map(|i| {
+      let mut res = [zero; V];
+
+      // * G[0][i]
+      let mut g_0_i = zero;
+      for (j, item) in gi.iter().enumerate().take(H) {
+        if (1 << j) & i > 0 {
+          g_0_i += item;
+        }
+      }
+
+      res[0] = g_0_i;
+
+      // * G[j][i]
+      for j in 1..V {
+        res[j] = (0..B).fold(res[j - 1], |acc, _| acc + acc);
+      }
+
+      res
+    })
+    .collect::<Vec<_>>();
+  #[cfg(not(feature = "std"))]
+  let mut precompute_res = (1..POW_2_H)
+    .into_iter()
     .map(|i| {
       let mut res = [zero; V];
 
@@ -423,11 +471,11 @@ fn fixed_base_exp_comb_batch<
 
   precompute_res.insert(0, [zero; V]);
 
-  let precomputed_g: [_; POW_2_H] = std::array::from_fn(|j| precompute_res[j]);
+  let precomputed_g: [_; POW_2_H] = array::from_fn(|j| precompute_res[j]);
 
   let zero = G::zero();
-
-  scalars
+  #[cfg(feature = "std")]
+  let res = scalars
     .par_iter()
     .map(|e| {
       let mut a = zero;
@@ -455,7 +503,39 @@ fn fixed_base_exp_comb_batch<
 
       a
     })
-    .collect::<Vec<_>>()
+    .collect::<Vec<_>>();
+  #[cfg(not(feature = "std"))]
+  let res = scalars
+    .iter()
+    .map(|e| {
+      let mut a = zero;
+      let mut bits = e.to_le_bits().into_iter().collect::<Vec<_>>();
+
+      while bits.len() % A != 0 {
+        bits.push(false);
+      }
+
+      for k in (0..B).rev() {
+        a += a;
+        for j in (0..V).rev() {
+          let i_j_k = (0..H)
+            .map(|h| {
+              let b = bits[h * A + j * B + k];
+              (1 << h) * b as usize
+            })
+            .sum::<usize>();
+
+          if i_j_k > 0 {
+            a += precomputed_g[i_j_k][j];
+          }
+        }
+      }
+
+      a
+    })
+    .collect::<Vec<_>>();
+
+  res
 }
 
 impl<E: Engine> CommitmentEngineTrait<E> for CommitmentEngine<E>
@@ -520,6 +600,7 @@ where
     }
   }
 
+  #[cfg(feature = "std")]
   fn load_setup(
     reader: &mut (impl std::io::Read + std::io::Seek),
     n: usize,

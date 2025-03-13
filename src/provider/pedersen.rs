@@ -1,10 +1,12 @@
 //! This module provides an implementation of a commitment engine
 #[cfg(not(feature = "std"))]
 use crate::prelude::*;
+#[cfg(feature = "std")]
+use crate::provider::ptau::read_points;
 use crate::{
   errors::NovaError,
   gadgets::utils::to_bignat_repr,
-  provider::{ptau::read_points, traits::DlogGroup},
+  provider::traits::DlogGroup,
   traits::{
     commitment::{CommitmentEngineTrait, CommitmentTrait, Len},
     AbsorbInRO2Trait, AbsorbInROTrait, Engine, ROTrait, TranscriptReprTrait,
@@ -20,8 +22,10 @@ use ff::Field;
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
+#[cfg(feature = "std")]
 use super::ptau::{write_points, PtauFileError};
 
+#[cfg(feature = "std")]
 const KEY_FILE_HEAD: [u8; 12] = *b"PEDERSEN_KEY";
 
 /// A type that holds commitment generators
@@ -192,6 +196,7 @@ impl<E: Engine> CommitmentKey<E>
 where
   E::GE: DlogGroup,
 {
+  #[cfg(feature = "std")]
   pub fn save_to(&self, writer: &mut impl std::io::Write) -> Result<(), PtauFileError> {
     writer.write_all(&KEY_FILE_HEAD)?;
     let mut points = Vec::with_capacity(self.ck.len() + 1);
@@ -254,6 +259,7 @@ where
     }
   }
 
+  #[cfg(feature = "std")]
   fn load_setup(
     reader: &mut (impl std::io::Read + std::io::Seek),
     n: usize,

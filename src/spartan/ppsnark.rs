@@ -857,7 +857,8 @@ pub struct ProverKey<E: Engine, EE: EvaluationEngineTrait<E>> {
 pub struct VerifierKey<E: Engine, EE: EvaluationEngineTrait<E>> {
   num_cons: usize,
   num_vars: usize,
-  vk_ee: EE::VerifierKey,
+  /// TODO
+  pub vk_ee: EE::VerifierKey,
   S_comm: R1CSShapeSparkCommitment<E>,
   #[serde(skip, default = "OnceCell::new")]
   digest: OnceCell<E::Scalar>,

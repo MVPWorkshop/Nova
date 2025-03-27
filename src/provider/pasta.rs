@@ -4,7 +4,8 @@ use crate::prelude::*;
 use crate::{
   impl_traits,
   provider::{
-    msm::{msm, msm_small},
+    msm::msm_small,
+    msm_fast::msm_best,
     traits::{DlogGroup, DlogGroupExt},
   },
   traits::{Group, PrimeFieldExt, TranscriptReprTrait},

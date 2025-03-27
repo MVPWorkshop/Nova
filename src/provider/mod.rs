@@ -13,6 +13,7 @@ pub mod secp_secq;
 #[cfg(feature = "blitzar")]
 pub(crate) mod blitzar;
 pub(crate) mod keccak;
+pub(crate) mod msm_fast;
 pub(crate) mod pedersen;
 pub(crate) mod ptau;
 pub(crate) mod traits;

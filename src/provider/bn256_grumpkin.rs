@@ -2,7 +2,7 @@
 use crate::{
   impl_traits,
   provider::{
-    msm::{msm, msm_small},
+    msm::msm_small,
     traits::{DlogGroup, DlogGroupExt, PairingGroup},
   },
   traits::{Group, PrimeFieldExt, TranscriptReprTrait},
@@ -13,6 +13,7 @@ use halo2curves::{
   bn256::{Bn256, G1Affine as Bn256Affine, G2Affine, G2Compressed, Gt, G1 as Bn256Point, G2},
   group::{cofactor::CofactorCurveAffine, Curve, Group as AnotherGroup},
   grumpkin::{G1Affine as GrumpkinAffine, G1 as GrumpkinPoint},
+  msm::msm_best,
   pairing::Engine as H2CEngine,
   CurveAffine, CurveExt,
 };
@@ -44,7 +45,7 @@ crate::impl_traits_no_dlog_ext!(
 impl DlogGroupExt for bn256::Point {
   #[cfg(not(feature = "blitzar"))]
   fn vartime_multiscalar_mul(scalars: &[Self::Scalar], bases: &[Self::AffineGroupElement]) -> Self {
-    msm(scalars, bases)
+    msm_best(scalars, bases)
   }
 
   fn vartime_multiscalar_mul_small<T: Integer + Into<u64> + Copy + Sync + ToPrimitive>(

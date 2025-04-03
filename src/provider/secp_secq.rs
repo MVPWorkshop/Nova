@@ -2,7 +2,7 @@
 use crate::{
   impl_traits,
   provider::{
-    msm::{msm, msm_small},
+    msm::msm_small,
     traits::{DlogGroup, DlogGroupExt},
   },
   traits::{Group, PrimeFieldExt, TranscriptReprTrait},
@@ -11,6 +11,7 @@ use digest::{ExtendableOutput, Update};
 use ff::FromUniformBytes;
 use halo2curves::{
   group::{cofactor::CofactorCurveAffine, Curve, Group as AnotherGroup},
+  msm::msm_best,
   secp256k1::{Secp256k1, Secp256k1Affine},
   secq256k1::{Secq256k1, Secq256k1Affine},
   CurveAffine, CurveExt,

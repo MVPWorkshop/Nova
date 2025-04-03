@@ -1252,8 +1252,11 @@ mod tests {
     assert!(res.is_ok());
     let compressed_snark = res.unwrap();
 
+    let start = std::time::Instant::now();
     // verify the compressed SNARK
     let res = compressed_snark.verify(&vk, num_steps, &[<E1 as Engine>::Scalar::ZERO]);
+    let duration = start.elapsed();
+    println!("Duration is -> {:?}", duration);
     assert!(res.is_ok());
   }
 
